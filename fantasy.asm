@@ -11,18 +11,43 @@ extern glfwWindowShouldClose
 extern gladLoadGL
 extern glClearColor
 extern glClear
+extern glCreateShader
+extern glShaderSource
+extern glCompileShader
+extern glGetShaderiv
+extern glCreateProgram
+extern glAttachShader
+extern glLinkProgram
+extern glGetProgramiv
+extern glDeleteShader
+extern glUseProgram
 
 section .rodata
-  gameExitSuccesfully db "The fantasy is over", 10, 0
+  gameExitSuccesfully db "The fantasy is over.", 10, 0
   glfwInitErrorMessage db "Failed to initialize GLFW", 10, 0
   glfwInitWindowErrorMessage db "Failed to create window", 10, 0
   gladLoadError db "Failed to load OpenGL functions", 10, 0
+  shaderCompileFailedMsg db "Failed to compile the shader", 10, 0
+  shaderLinkFailedMsg db "Program linking failed", 10, 0
   windowTitle db "Open Fantasy", 0
+
+  shaderVertexSource db `#version 120\nvoid main() {\n  gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;\n}\n`, 0
+  shaderFragmentSource db `#version 120\nvoid main() {\n  gl_FragColor = vec4(1.0);\n}\n`, 0
+
   clearColor0_1 dd 0.1
   clearColor1_0 dd 1.0
 
 section .data
-  window dd 0
+  window dq 0
+  shaderVertexSourcePtr: 
+    dq shaderVertexSource
+  shaderFragmentSourcePtr:
+    dq shaderFragmentSource
+  shaderProgram dd 0
+
+section .bss
+  shaderCompileSucess:
+    resd 1
 
 section .note.GNU-stack noalloc noexec nowrite progbits
 
@@ -47,15 +72,15 @@ _start:
 
   mov rdi, 800
   mov rsi, 600
-  mov rdx, windowTitle
+  lea rdx, [rel windowTitle]
   mov rcx, 0
-  mov rax, 0
+  mov r8, 0
   call glfwCreateWindow
-  test eax, eax
+  test rax, rax
   jz _start_glfw_window_error
-  mov [window], eax
+  mov [rel window], rax
 
-  mov edi, [window]
+  mov rdi, [rel window]
   call glfwMakeContextCurrent
 
   mov rdi, 1
@@ -71,44 +96,171 @@ _start:
   movss xmm3, [rel clearColor1_0]
   call glClearColor
 
+  call shaderCreateProgram
+  mov edi, eax
+  call glUseProgram
+
 _start_window_loop:
   mov rdi, 0x4100
   call glClear
 
   ; The game happens here
 
-  mov edi, [window]
+  mov rdi, [rel window]
   call glfwSwapBuffers
   call glfwPollEvents
 
-  mov edi, [window]
+  mov rdi, [rel window]
   call glfwWindowShouldClose
   test eax, eax
   jz _start_window_loop
 
-  mov edi, [window]
+  mov rdi, [rel window]
   call glfwDestroyWindow
   call glfwTerminate
 
-  mov rdi, gameExitSuccesfully
+  lea rdi, [rel gameExitSuccesfully]
   call sys_print
   call sys_exit
 
 _start_glfw_error:
-  mov rdi, glfwInitErrorMessage
+  lea rdi, [rel glfwInitErrorMessage]
   call sys_print
   call sys_exit
 
 _start_glfw_window_error:
   call glfwTerminate
-  mov rdi, glfwInitWindowErrorMessage
+  lea rdi, [rel glfwInitWindowErrorMessage]
   call sys_print
   call sys_exit
 
 _start_glad_load_error:
-  mov rdi, gladLoadError
+  lea rdi, [rel gladLoadError]
   call sys_print
-  mov edi, [window]
+  mov rdi, [rel window]
+  call glfwDestroyWindow
+  call glfwTerminate
+  call sys_exit
+
+; -------------------------------------------------------------
+; shaderCompile(rdi_uint_type: unsigned int, rsi_source: const char *source)
+;
+; Compiles a fragment or vertex shader and checks if it fails
+; it doesn't check the shader logs because the shader is simple enough
+; and this is not meant for a general purpose shader function
+;
+; rdi: type of shader
+; rsi: pointer to the shader source code
+;
+; returns:
+;	rax = uint for created shader
+;
+; -------------------------------------------------------------
+shaderCompile:
+  push r12
+  push r13
+  sub rsp, 8
+
+  mov r13, rsi
+
+  call glCreateShader
+  mov r12d, eax
+
+  mov edi, r12d
+  mov esi, 1
+  mov rdx, r13
+  xor ecx, ecx
+  call glShaderSource
+
+  mov edi, r12d
+  call glCompileShader
+
+  mov edi, r12d
+  mov esi, 0x8B81
+  lea rdx, [rel shaderCompileSucess]  
+  call glGetShaderiv
+  mov eax, [rel shaderCompileSucess]
+  test eax, eax
+  jz shaderCompileFailed
+
+  mov eax, r12d
+
+  add rsp, 8
+  pop r13
+  pop r12
+  ret
+
+shaderCompileFailed:
+  lea rdi, [rel shaderCompileFailedMsg]
+  call sys_print
+  mov rdi, [rel window]
+  call glfwDestroyWindow
+  call glfwTerminate
+  call sys_exit
+
+; -------------------------------------------------------------
+; shaderCreateProgram()
+;
+; Compiles both vertex and fragment shaders and link them
+; together into the shader program
+;
+; returns:
+;	eax = uint for the shader program
+;
+; -------------------------------------------------------------
+shaderCreateProgram:
+  push r12
+  push r13
+  sub rsp, 8
+
+  mov edi, 0x8B31
+  lea rsi, [rel shaderVertexSourcePtr]
+  call shaderCompile
+  mov r12d, eax
+
+  mov edi, 0x8B30
+  lea rsi, [rel shaderFragmentSourcePtr]
+  call shaderCompile
+  mov r13d, eax
+
+  call glCreateProgram
+  mov [rel shaderProgram], eax
+
+  mov edi, [rel shaderProgram]
+  mov esi, r12d
+  call glAttachShader
+
+  mov edi, [rel shaderProgram]
+  mov esi, r13d
+  call glAttachShader
+
+  mov edi, [rel shaderProgram]
+  call glLinkProgram
+
+  mov edi, [rel shaderProgram]
+  mov esi, 0x8B82
+  lea rdx, [rel shaderCompileSucess]  
+  call glGetProgramiv
+  mov eax, [rel shaderCompileSucess]
+  test eax, eax
+  jz shaderCreateProgramError
+
+  mov edi, r12d
+  call glDeleteShader
+
+  mov edi, r13d
+  call glDeleteShader
+
+  mov eax, [rel shaderProgram]
+  add rsp, 8
+  pop r13
+  pop r12
+  ret
+
+shaderCreateProgramError:
+  lea rdi, [rel shaderLinkFailedMsg]
+  call sys_print
+  mov rdi, [rel window]
   call glfwDestroyWindow
   call glfwTerminate
   call sys_exit
