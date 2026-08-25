@@ -30,6 +30,14 @@ extern glVertexAttribPointer
 extern glEnableVertexAttribArray
 extern glDrawArrays
 extern glBindAttribLocation
+extern glGenTextures
+extern glBindTexture
+extern glTexParameteri
+extern glTexImage2D
+extern glTexSubImage2D
+extern glActiveTexture
+extern glGetUniformLocation
+extern glUniform1i
 
 section .rodata
   gameExitSuccesfully db "The fantasy is over.", 10, 0
@@ -40,6 +48,7 @@ section .rodata
   shaderLinkFailedMsg db "Program linking failed", 10, 0
   windowTitle db "Open Fantasy", 0
   aTexCoordsAttribute db "aTexCoords", 0
+  uTextureUniform db "uTexture", 0
 
   shaderVertexSource: 
     db "#version 120", 10
@@ -68,23 +77,27 @@ section .rodata
     dd  1.0,  1.0, 0.0
     dd -1.0,  1.0, 0.0
   screenTexCoords:
-    dd 0, 1
-    dd 1, 1
-    dd 0, 0
-    dd 1, 1
-    dd 1, 0
-    dd 0, 0
+    dd 0.0, 1.0
+    dd 1.0, 1.0
+    dd 0.0, 0.0
+    dd 1.0, 1.0
+    dd 1.0, 0.0
+    dd 0.0, 0.0
 
 section .data
   window dq 0
   shaderVertexSourcePtr dq shaderVertexSource
   shaderFragmentSourcePtr dq shaderFragmentSource
   shaderProgram dd 0
+  pixelX dq 0
 
 section .bss
   shaderCompileSucess resd 1
   screenVAO resd 1
   screenVBO resd 2
+  frameBuffer resb 245760
+  texture resd 1
+  textureUniformLocation resd 1
 
 section .note.GNU-stack noalloc noexec nowrite progbits
 
@@ -107,8 +120,8 @@ _start:
   mov rsi, 1
   call glfwWindowHint
 
-  mov rdi, 800
-  mov rsi, 600
+  mov rdi, 512
+  mov rsi, 480
   lea rdx, [rel windowTitle]
   mov rcx, 0
   mov r8, 0
@@ -117,10 +130,10 @@ _start:
   jz _start_glfw_window_error
   mov [rel window], rax
 
-  mov rdi, [rel window]
+  mov edi, [rel window]
   call glfwMakeContextCurrent
 
-  mov rdi, 1
+  mov edi, 1
   call glfwSwapInterval
 
   call gladLoadGL
@@ -138,11 +151,13 @@ _start:
   call glUseProgram
 
   call geometryCreateScreen
+  call textureCreateScreen
 
 _start_window_loop:
   mov rdi, 0x4100
   call glClear
 
+  call textureUpdateFrameBuffer
   call screenRender
 
   mov rdi, [rel window]
@@ -192,6 +207,17 @@ screenRender:
 
   mov edi, [rel screenVAO]
   call glBindVertexArray
+
+  mov edi, 0x84C0
+  call glActiveTexture
+
+  mov edi, 0x0DE1
+  mov esi, [rel texture]
+  call glBindTexture
+
+  mov edi, [rel textureUniformLocation]
+  xor esi, esi
+  call glUniform1i
 
   mov rdi, 0x0004
   xor rsi, rsi
@@ -294,7 +320,7 @@ shaderCreateProgram:
   call glAttachShader
 
   mov edi, [rel shaderProgram]
-  mov rsi, 1
+  mov esi, 1
   lea rdx, [rel aTexCoordsAttribute]
   call glBindAttribLocation
 
@@ -314,6 +340,11 @@ shaderCreateProgram:
 
   mov edi, r13d
   call glDeleteShader
+
+  mov edi, [rel shaderProgram]
+  lea rsi, [rel uTextureUniform]
+  call glGetUniformLocation
+  mov [textureUniformLocation], rax
 
   mov eax, [rel shaderProgram]
   add rsp, 8
@@ -339,11 +370,11 @@ shaderCreateProgramError:
 geometryCreateScreen:
   sub rsp, 8
 
-  mov rdi, 1
+  mov edi, 1
   lea rsi, [rel screenVAO]
   call glGenVertexArrays
 
-  mov rdi, 2
+  mov edi, 2
   lea rsi, [rel screenVBO]
   call glGenBuffers
 
@@ -398,6 +429,99 @@ geometryCreateScreen:
 
   xor rdi, rdi
   call glBindVertexArray
+
+  add rsp, 8
+  ret
+
+; -------------------------------------------------------------
+; textureUpdateFrameBuffer()
+;
+; Updates the screen texture with the frameBuffer contents
+;
+; -------------------------------------------------------------
+textureUpdateFrameBuffer:
+  sub rsp, 8
+
+  mov rdi, [rel pixelX]
+  shl rdi, 2
+  lea rax, [rel frameBuffer]
+  mov byte [rax + rdi], 255
+
+  mov rdi, [rel pixelX]
+  inc rdi
+  mov qword [pixelX], rdi
+
+  mov edi, 0xDE1
+  mov esi, [rel texture]
+  call glBindTexture
+
+  mov edi, 0xDE1
+  xor esi, esi
+  xor edx, edx
+  xor ecx, ecx
+  mov r8d, 256
+  mov r9d, 240
+
+  sub rsp, 32
+
+  mov qword [rsp], 0x1908
+  mov qword [rsp + 8], 0x1401
+
+  lea rax, [rel frameBuffer]
+  mov qword [rsp + 16], rax
+
+  call glTexSubImage2D
+
+  add rsp, 32
+
+  add rsp, 8
+  ret
+
+; -------------------------------------------------------------
+; textureCreateScreen()
+;
+; Creates a 256x240 RGBA texture in OpenGL
+;
+; -------------------------------------------------------------
+textureCreateScreen:
+  sub rsp, 8
+
+  mov edi, 1
+  lea rsi, [rel texture]
+  call glGenTextures
+
+  mov edi, 0xDE1
+  mov esi, [rel texture]
+  call glBindTexture
+
+  mov edi, 0xDE1
+  mov esi, 0x2801
+  mov edx, 0x2600
+  call glTexParameteri
+
+  mov edi, 0xDE1
+  mov esi, 0x2800
+  mov edx, 0x2600
+  call glTexParameteri
+
+  mov edi, 0xDE1
+  xor esi, esi
+  mov edx, 0x1908
+  mov ecx, 256
+  mov r8d, 240
+  xor r9d, r9d
+
+  sub rsp, 32
+
+  mov qword [rsp], 0x1908
+  mov qword [rsp + 8], 0x1401
+
+  xor eax, eax
+  mov qword [rsp + 16], rax
+
+  call glTexImage2D
+
+  add rsp, 32
 
   add rsp, 8
   ret
