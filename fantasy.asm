@@ -29,6 +29,7 @@ extern glBufferData
 extern glVertexAttribPointer
 extern glEnableVertexAttribArray
 extern glDrawArrays
+extern glBindAttribLocation
 
 section .rodata
   gameExitSuccesfully db "The fantasy is over.", 10, 0
@@ -38,9 +39,23 @@ section .rodata
   shaderCompileFailedMsg db "Failed to compile the shader", 10, 0
   shaderLinkFailedMsg db "Program linking failed", 10, 0
   windowTitle db "Open Fantasy", 0
+  aTexCoordsAttribute db "aTexCoords", 0
 
-  shaderVertexSource db `#version 120\nvoid main() {\n  gl_Position = gl_Vertex;\n}\n`, 0
-  shaderFragmentSource db `#version 120\nvoid main() {\n  gl_FragColor = vec4(1.0);\n}\n`, 0
+  shaderVertexSource: 
+    db "#version 120", 10
+    db "attribute vec2 aTexCoords;", 10
+    db "varying vec2 vTexCoords;", 10
+    db "void main() {", 10
+    db "  gl_Position = gl_Vertex;", 10
+    db "  vTexCoords = aTexCoords;", 10
+    db "}", 10, 0
+  shaderFragmentSource:
+    db "#version 120", 10
+    db "uniform sampler2D uTexture;", 10
+    db "varying vec2 vTexCoords;", 10
+    db "void main() {", 10
+    db "  gl_FragColor = texture2D(uTexture, vTexCoords);", 10
+    db "}", 10, 0
 
   clearColor0_1 dd 0.1
   clearColor1_0 dd 1.0
@@ -52,6 +67,13 @@ section .rodata
     dd  1.0, -1.0, 0.0
     dd  1.0,  1.0, 0.0
     dd -1.0,  1.0, 0.0
+  screenTexCoords:
+    dd 0, 1
+    dd 1, 1
+    dd 0, 0
+    dd 1, 1
+    dd 1, 0
+    dd 0, 0
 
 section .data
   window dq 0
@@ -62,7 +84,7 @@ section .data
 section .bss
   shaderCompileSucess resd 1
   screenVAO resd 1
-  screenVBO resd 1
+  screenVBO resd 2
 
 section .note.GNU-stack noalloc noexec nowrite progbits
 
@@ -272,6 +294,11 @@ shaderCreateProgram:
   call glAttachShader
 
   mov edi, [rel shaderProgram]
+  mov rsi, 1
+  lea rdx, [rel aTexCoordsAttribute]
+  call glBindAttribLocation
+
+  mov edi, [rel shaderProgram]
   call glLinkProgram
 
   mov edi, [rel shaderProgram]
@@ -316,7 +343,7 @@ geometryCreateScreen:
   lea rsi, [rel screenVAO]
   call glGenVertexArrays
 
-  mov rdi, 1
+  mov rdi, 2
   lea rsi, [rel screenVBO]
   call glGenBuffers
 
@@ -342,6 +369,27 @@ geometryCreateScreen:
   call glVertexAttribPointer
 
   xor rdi, rdi
+  call glEnableVertexAttribArray
+
+  mov rdi, 0x8892
+  mov esi, [rel screenVBO + 4]
+  call glBindBuffer
+
+  mov rdi, 0x8892
+  mov rsi, 48
+  lea rdx, [rel screenTexCoords]
+  mov rcx, 0x88E4
+  call glBufferData
+
+  mov rdi, 1
+  mov rsi, 2
+  mov rdx, 0x1406
+  xor rcx, rcx
+  mov r8, 8
+  xor r9, r9
+  call glVertexAttribPointer
+
+  mov rdi, 1
   call glEnableVertexAttribArray
 
   mov rdi, 0x8892
