@@ -21,6 +21,14 @@ extern glLinkProgram
 extern glGetProgramiv
 extern glDeleteShader
 extern glUseProgram
+extern glGenVertexArrays
+extern glGenBuffers
+extern glBindVertexArray
+extern glBindBuffer
+extern glBufferData
+extern glVertexAttribPointer
+extern glEnableVertexAttribArray
+extern glDrawArrays
 
 section .rodata
   gameExitSuccesfully db "The fantasy is over.", 10, 0
@@ -31,23 +39,30 @@ section .rodata
   shaderLinkFailedMsg db "Program linking failed", 10, 0
   windowTitle db "Open Fantasy", 0
 
-  shaderVertexSource db `#version 120\nvoid main() {\n  gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;\n}\n`, 0
+  shaderVertexSource db `#version 120\nvoid main() {\n  gl_Position = gl_Vertex;\n}\n`, 0
   shaderFragmentSource db `#version 120\nvoid main() {\n  gl_FragColor = vec4(1.0);\n}\n`, 0
 
   clearColor0_1 dd 0.1
   clearColor1_0 dd 1.0
 
+  screenVertices:
+    dd -1.0, -1.0, 0.0
+    dd  1.0, -1.0, 0.0
+    dd -1.0,  1.0, 0.0
+    dd  1.0, -1.0, 0.0
+    dd  1.0,  1.0, 0.0
+    dd -1.0,  1.0, 0.0
+
 section .data
   window dq 0
-  shaderVertexSourcePtr: 
-    dq shaderVertexSource
-  shaderFragmentSourcePtr:
-    dq shaderFragmentSource
+  shaderVertexSourcePtr dq shaderVertexSource
+  shaderFragmentSourcePtr dq shaderFragmentSource
   shaderProgram dd 0
 
 section .bss
-  shaderCompileSucess:
-    resd 1
+  shaderCompileSucess resd 1
+  screenVAO resd 1
+  screenVBO resd 1
 
 section .note.GNU-stack noalloc noexec nowrite progbits
 
@@ -100,11 +115,13 @@ _start:
   mov edi, eax
   call glUseProgram
 
+  call geometryCreateScreen
+
 _start_window_loop:
   mov rdi, 0x4100
   call glClear
 
-  ; The game happens here
+  call screenRender
 
   mov rdi, [rel window]
   call glfwSwapBuffers
@@ -141,6 +158,26 @@ _start_glad_load_error:
   call glfwDestroyWindow
   call glfwTerminate
   call sys_exit
+
+; -------------------------------------------------------------
+; screenRender()
+;
+; Renders two triangles from the screenVAO into OpenGL
+;
+; -------------------------------------------------------------
+screenRender:
+  sub rsp, 8
+
+  mov edi, [rel screenVAO]
+  call glBindVertexArray
+
+  mov rdi, 0x0004
+  xor rsi, rsi
+  mov rdx, 6
+  call glDrawArrays
+
+  add rsp, 8
+  ret
 
 ; -------------------------------------------------------------
 ; shaderCompile(rdi_uint_type: unsigned int, rsi_source: const char *source)
@@ -264,6 +301,58 @@ shaderCreateProgramError:
   call glfwDestroyWindow
   call glfwTerminate
   call sys_exit
+
+; -------------------------------------------------------------
+; geometryCreateScreen()
+;
+; Uploads the two triangle array as an openGL VAO, VBO for the
+; only screen geometry in the game
+;
+; -------------------------------------------------------------
+geometryCreateScreen:
+  sub rsp, 8
+
+  mov rdi, 1
+  lea rsi, [rel screenVAO]
+  call glGenVertexArrays
+
+  mov rdi, 1
+  lea rsi, [rel screenVBO]
+  call glGenBuffers
+
+  mov edi, [rel screenVAO]
+  call glBindVertexArray
+
+  mov rdi, 0x8892
+  mov esi, [rel screenVBO]
+  call glBindBuffer
+
+  mov rdi, 0x8892
+  mov rsi, 72
+  lea rdx, [rel screenVertices]
+  mov rcx, 0x88E4
+  call glBufferData
+
+  xor rdi, rdi
+  mov rsi, 3
+  mov rdx, 0x1406
+  xor rcx, rcx
+  mov r8, 12
+  xor r9, r9
+  call glVertexAttribPointer
+
+  xor rdi, rdi
+  call glEnableVertexAttribArray
+
+  mov rdi, 0x8892
+  xor rsi, rsi
+  call glBindBuffer
+
+  xor rdi, rdi
+  call glBindVertexArray
+
+  add rsp, 8
+  ret
 
 ; -------------------------------------------------------------
 ; str_len(rdi_str_pointer: string)
