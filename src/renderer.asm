@@ -4,6 +4,7 @@ extern texture
 
 global frameBuffer
 global rendererUpdateFrameBuffer
+global rendererDrawSquare
 
 section .bss
   frameBuffer resb 245760
@@ -23,15 +24,6 @@ section .text
 ; -------------------------------------------------------------
 rendererUpdateFrameBuffer:
   sub rsp, 8
-
-  mov rdi, [rel pixelX]
-  shl rdi, 2
-  lea rax, [rel frameBuffer]
-  mov byte [rax + rdi], 255
-
-  mov rdi, [rel pixelX]
-  inc rdi
-  mov qword [pixelX], rdi
 
   mov edi, 0xDE1
   mov esi, [rel texture]
@@ -58,3 +50,35 @@ rendererUpdateFrameBuffer:
 
   add rsp, 8
   ret
+
+; -------------------------------------------------------------
+; rendererUpdateFrameBuffer(rdi: x, rsi: y, rdx: w, rcx: h)
+;
+; Draws a red square of width rdx and height rcx at rdi,rsi
+;
+; -------------------------------------------------------------
+rendererDrawSquare:
+  push r12
+
+  xor r8, r8
+rendererDrawSquare_horizontalLoop:
+  xor r9, r9
+rendererDrawSquare_verticalLoop:
+  mov r12, r9
+  add r12, rsi
+  imul r12, 256
+  add r12, r8
+  add r12, rdi
+  shl r12, 2
+  lea rax, [rel frameBuffer]
+  mov byte [rax + r12], 255
+
+  inc r9
+  cmp r9, rcx
+  jl rendererDrawSquare_verticalLoop
+
+  inc r8
+  cmp r8, rdx
+  jl rendererDrawSquare_horizontalLoop
+
+  pop r12

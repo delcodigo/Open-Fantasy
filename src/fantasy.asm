@@ -41,6 +41,7 @@ extern glGetUniformLocation
 extern glUniform1i
 
 extern rendererUpdateFrameBuffer
+extern rendererDrawSquare
 
 global texture
 
@@ -155,6 +156,12 @@ _start:
 
   call geometryCreateScreen
   call textureCreateScreen
+
+  mov rdi, 32
+  mov rsi, 32
+  mov rdx, 16
+  mov rcx, 16
+  call rendererDrawSquare
 
 _start_window_loop:
   mov rdi, 0x4100
