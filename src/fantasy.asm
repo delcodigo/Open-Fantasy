@@ -43,9 +43,10 @@ extern glUniform1i
 extern rendererUpdateFrameBuffer
 extern rendererDrawSquare
 extern rendererDrawSprite
+extern rendererDrawMacroSprite
 
-extern warrior_ow_fd_tl
-extern warrior_ow_pal_1
+extern warrior_ow_fd
+extern warrior_ow_pal
 
 global texture
 
@@ -163,9 +164,9 @@ _start:
 
   mov rdi, 16
   mov rsi, 16
-  lea rdx, [rel warrior_ow_fd_tl]
-  lea rcx, [rel warrior_ow_pal_1]
-  call rendererDrawSprite
+  lea rdx, [rel warrior_ow_fd]
+  lea rcx, [rel warrior_ow_pal]
+  call rendererDrawMacroSprite
 
 _start_window_loop:
   mov rdi, 0x4100

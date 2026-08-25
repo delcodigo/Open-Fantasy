@@ -6,6 +6,7 @@ global frameBuffer
 global rendererUpdateFrameBuffer
 global rendererDrawSquare
 global rendererDrawSprite
+global rendererDrawMacroSprite
 
 section .bss
   frameBuffer resb 245760
@@ -86,7 +87,10 @@ rendererDrawSquare_verticalLoop:
   ret
 
 ; -------------------------------------------------------------
-; rdi: x, rsi: y, rdx: sprite, rcx: palette
+; rendererDrawSprite(rdi: x, rsi: y, rdx: sprite, rcx: palette)
+;
+; Draws an 8x8 sprite using 2bpp indexed sprites and a palette
+;
 ; -------------------------------------------------------------
 rendererDrawSprite:
   push r12
@@ -163,6 +167,54 @@ rendererDrawSprite_skipRender:
   cmp r14, 8
   jl rendererDrawSprite_verticalLoop
 
+  pop r14
+  pop r13
+  pop r12
+  ret
+
+; -------------------------------------------------------------
+; rendererDrawMacroSprite(rdi: x, rsi: y, rdx: macro_sprite, rcx: macro_palette)
+;
+; Draws 4 8x8 sprites ordered by top-left, top-right, bottom-left and bottom-right
+; each sprite must have a correspondant palette associated wiht it
+;
+; -------------------------------------------------------------
+rendererDrawMacroSprite:
+  push r12
+  push r13
+  push r14
+  push r15
+  push rbx
+  
+  xor r15, r15
+  xor r13, r13
+  mov r12, rdx
+  mov r14, rdi
+  mov rbx, rcx
+
+rendererDrawMacroSprite_loop:
+  mov rdx, [r12 + r15 * 8]
+  mov rcx, [rbx + r15 * 8]
+  call rendererDrawSprite
+
+  mov rdi, r14
+  add rdi, 8
+  
+  inc r15
+
+  inc r13
+  cmp r13, 2
+  jl rendererDrawMacroSprite_loop
+
+  mov rdi, r14
+  xor r13, r13
+  add rsi, 8
+  
+  cmp r15, 4
+  jl rendererDrawMacroSprite_loop
+
+  pop rbx
+  pop r15
   pop r14
   pop r13
   pop r12
