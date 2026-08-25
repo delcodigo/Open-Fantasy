@@ -42,6 +42,10 @@ extern glUniform1i
 
 extern rendererUpdateFrameBuffer
 extern rendererDrawSquare
+extern rendererDrawSprite
+
+extern warrior_ow_fd_tl
+extern warrior_ow_pal_1
 
 global texture
 
@@ -157,11 +161,11 @@ _start:
   call geometryCreateScreen
   call textureCreateScreen
 
-  mov rdi, 32
-  mov rsi, 32
-  mov rdx, 16
-  mov rcx, 16
-  call rendererDrawSquare
+  mov rdi, 16
+  mov rsi, 16
+  lea rdx, [rel warrior_ow_fd_tl]
+  lea rcx, [rel warrior_ow_pal_1]
+  call rendererDrawSprite
 
 _start_window_loop:
   mov rdi, 0x4100
