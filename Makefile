@@ -7,24 +7,28 @@ CFLAGS = -g -c
 LDFLAGS = -dynamic-linker /lib64/ld-linux-x86-64.so.2
 LIBS = -lglfw -lGL -lm -ldl -lc
 
-SRC = fantasy.asm
+SRC_DIR = src
+BUILD_DIR = build
 GLAD_SRC = dependencies/glad.c
-OBJ = build/fantasy.o
-GLAD_OBJ = build/glad.o
 BIN = bin/fantasy
+
+ASM_SRCS = $(wildcard $(SRC_DIR)/*.asm)
+ASM_OBJS = $(patsubst $(SRC_DIR)/%.asm,$(BUILD_DIR)/%.o,$(ASM_SRCS))
+GLAD_OBJ = $(BUILD_DIR)/glad.o
+OBJS = $(ASM_OBJS) $(GLAD_OBJ)
 
 all: $(BIN)
 
-$(BIN): $(OBJ) $(GLAD_OBJ)
+$(BIN): $(OBJS)
 	mkdir -p bin
-	$(LD) $(OBJ) $(GLAD_OBJ) -o $(BIN) $(LDFLAGS) $(LIBS)
+	$(LD) $(OBJS) -o $(BIN) $(LDFLAGS) $(LIBS)
 
-$(OBJ): $(SRC)
-	mkdir -p build
-	$(ASM) $(ASMFLAGS) $(SRC) -o $(OBJ)
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.asm
+	mkdir -p $(BUILD_DIR)
+	$(ASM) $(ASMFLAGS) $< -o $@
 
 $(GLAD_OBJ): $(GLAD_SRC)
-	mkdir -p build
+	mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(GLAD_SRC) -o $(GLAD_OBJ)
 
 run: $(BIN)

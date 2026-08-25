@@ -8,7 +8,9 @@ extern glfwSwapInterval
 extern glfwSwapBuffers
 extern glfwPollEvents
 extern glfwWindowShouldClose
+
 extern gladLoadGL
+
 extern glClearColor
 extern glClear
 extern glCreateShader
@@ -34,10 +36,13 @@ extern glGenTextures
 extern glBindTexture
 extern glTexParameteri
 extern glTexImage2D
-extern glTexSubImage2D
 extern glActiveTexture
 extern glGetUniformLocation
 extern glUniform1i
+
+extern rendererUpdateFrameBuffer
+
+global texture
 
 section .rodata
   gameExitSuccesfully db "The fantasy is over.", 10, 0
@@ -89,13 +94,11 @@ section .data
   shaderVertexSourcePtr dq shaderVertexSource
   shaderFragmentSourcePtr dq shaderFragmentSource
   shaderProgram dd 0
-  pixelX dq 0
 
 section .bss
   shaderCompileSucess resd 1
   screenVAO resd 1
   screenVBO resd 2
-  frameBuffer resb 245760
   texture resd 1
   textureUniformLocation resd 1
 
@@ -157,7 +160,7 @@ _start_window_loop:
   mov rdi, 0x4100
   call glClear
 
-  call textureUpdateFrameBuffer
+  call rendererUpdateFrameBuffer
   call screenRender
 
   mov rdi, [rel window]
@@ -429,50 +432,6 @@ geometryCreateScreen:
 
   xor rdi, rdi
   call glBindVertexArray
-
-  add rsp, 8
-  ret
-
-; -------------------------------------------------------------
-; textureUpdateFrameBuffer()
-;
-; Updates the screen texture with the frameBuffer contents
-;
-; -------------------------------------------------------------
-textureUpdateFrameBuffer:
-  sub rsp, 8
-
-  mov rdi, [rel pixelX]
-  shl rdi, 2
-  lea rax, [rel frameBuffer]
-  mov byte [rax + rdi], 255
-
-  mov rdi, [rel pixelX]
-  inc rdi
-  mov qword [pixelX], rdi
-
-  mov edi, 0xDE1
-  mov esi, [rel texture]
-  call glBindTexture
-
-  mov edi, 0xDE1
-  xor esi, esi
-  xor edx, edx
-  xor ecx, ecx
-  mov r8d, 256
-  mov r9d, 240
-
-  sub rsp, 32
-
-  mov qword [rsp], 0x1908
-  mov qword [rsp + 8], 0x1401
-
-  lea rax, [rel frameBuffer]
-  mov qword [rsp + 16], rax
-
-  call glTexSubImage2D
-
-  add rsp, 32
 
   add rsp, 8
   ret
