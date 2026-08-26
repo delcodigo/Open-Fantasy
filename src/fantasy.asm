@@ -40,6 +40,7 @@ extern glActiveTexture
 extern glGetUniformLocation
 extern glUniform1i
 
+extern rendererClearFrameBuffer
 extern rendererUpdateFrameBuffer
 extern rendererDrawSquare
 extern rendererDrawSprite
@@ -47,6 +48,8 @@ extern rendererDrawMacroSprite
 
 extern warrior_ow_fd
 extern warrior_ow_pal
+
+extern dummyAnimationUpdate
 
 global texture
 
@@ -162,15 +165,21 @@ _start:
   call geometryCreateScreen
   call textureCreateScreen
 
-  mov rdi, 16
-  mov rsi, 16
-  lea rdx, [rel warrior_ow_fd]
-  lea rcx, [rel warrior_ow_pal]
-  call rendererDrawMacroSprite
-
 _start_window_loop:
   mov rdi, 0x4100
   call glClear
+
+  call rendererClearFrameBuffer
+
+  call dummyAnimationUpdate
+  mov r8, rax
+
+  mov rdi, 16
+  mov rsi, 16
+  lea rax, [rel warrior_ow_fd]
+  mov rdx, [rax + r8 * 8]
+  lea rcx, [rel warrior_ow_pal]
+  call rendererDrawMacroSprite
 
   call rendererUpdateFrameBuffer
   call screenRender

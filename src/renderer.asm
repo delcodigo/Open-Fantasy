@@ -7,6 +7,7 @@ global rendererUpdateFrameBuffer
 global rendererDrawSquare
 global rendererDrawSprite
 global rendererDrawMacroSprite
+global rendererClearFrameBuffer
 
 section .bss
   frameBuffer resb 245760
@@ -17,6 +18,13 @@ section .data
 section .note.GNU-stack noalloc noexec nowrite progbits
 
 section .text
+
+rendererClearFrameBuffer:
+  lea rdi, [rel frameBuffer]
+  xor eax, eax
+  mov ecx, 245760 / 8
+  rep stosq
+  ret
 
 ; -------------------------------------------------------------
 ; rendererUpdateFrameBuffer()
