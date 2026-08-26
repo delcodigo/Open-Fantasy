@@ -10,6 +10,7 @@ extern glfwPollEvents
 extern glfwWindowShouldClose
 extern glfwSetFramebufferSizeCallback
 extern glfwMaximizeWindow
+extern glfwSetKeyCallback
 
 extern gladLoadGL
 
@@ -58,7 +59,10 @@ extern stonepavedRoad_pal
 extern grass_tile
 extern stonepavedRoad_tile
 
-extern dummyAnimationUpdate
+extern inputKeyCallback
+
+extern playerOverworld_update
+extern playerOverworld_render
 
 global texture
 
@@ -186,6 +190,10 @@ _start:
   mov edx, 480
   call rendererFrameBufferResizeCallback
 
+  mov rdi, [rel window]
+  lea rsi, [rel inputKeyCallback]
+  call glfwSetKeyCallback
+
 _start_window_loop:
   mov rdi, 0x4100
   call glClear
@@ -246,15 +254,8 @@ _start_window_loop:
   lea rcx, [rel grass_pal]
   call rendererDrawTile
 
-  call dummyAnimationUpdate
-  mov r8, rax
-
-  mov rdi, 16
-  mov rsi, 16
-  lea rax, [rel warrior_ow_fd]
-  mov rdx, [rax + r8 * 8]
-  lea rcx, [rel warrior_ow_pal]
-  call rendererDrawMacroSprite
+  call playerOverworld_update
+  call playerOverworld_render
 
   call rendererUpdateFrameBuffer
   call screenRender

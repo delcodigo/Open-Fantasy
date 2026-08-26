@@ -1,0 +1,8 @@
+%define GLFW_KEY_RIGHT 262
+%define GLFW_KEY_LEFT 263
+%define GLFW_KEY_DOWN 264
+%define GLFW_KEY_UP 265
+%define KEY_UP 0
+%define KEY_LEFT 1
+%define KEY_DOWN 2
+%define KEY_RIGHT 3

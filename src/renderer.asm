@@ -19,8 +19,6 @@ section .bss
 section .data
   pixelX dq 0
 
-section .note.GNU-stack noalloc noexec nowrite progbits
-
 section .text
 
 ; edi: window, esi: width, edx: height
@@ -147,7 +145,7 @@ rendererDrawSquare_verticalLoop:
   ret
 
 ; -------------------------------------------------------------
-; rendererDrawSprite(rdi: x, rsi: y, rdx: sprite, rcx: palette)
+; rendererDrawSprite(edi: x, esi: y, rdx: sprite, rcx: palette)
 ;
 ; Draws an 8x8 sprite using 2bpp indexed sprites and a palette
 ;
@@ -156,6 +154,9 @@ rendererDrawSprite:
   push r12
   push r13
   push r14
+
+  movsxd rdi, edi
+  movsxd rsi, esi
 
   xor r14, r14
   lea r13, [rel frameBuffer]
@@ -233,7 +234,7 @@ rendererDrawSprite_skipRender:
   ret
 
 ; -------------------------------------------------------------
-; rendererDrawMacroSprite(rdi: x, rsi: y, rdx: macro_sprite, rcx: macro_palette)
+; rendererDrawMacroSprite(edi: x, esi: y, rdx: macro_sprite, rcx: macro_palette)
 ;
 ; Draws 4 8x8 sprites ordered by top-left, top-right, bottom-left and bottom-right
 ; each sprite must have a correspondant palette associated wiht it
@@ -281,7 +282,7 @@ rendererDrawMacroSprite_loop:
   ret
 
   ; -------------------------------------------------------------
-; rendererDrawTile(rdi: x, rsi: y, rdx: macro_sprite, rcx: palette)
+; rendererDrawTile(edi: x, esi: y, rdx: macro_sprite, rcx: palette)
 ;
 ; Draws 4 8x8 tiles ordered by top-left, top-right, bottom-left and bottom-right
 ; each sprite tile share the same palette
@@ -323,3 +324,5 @@ rendererDrawTile_loop:
   pop r13
   pop r12
   ret
+
+  section .note.GNU-stack noalloc noexec nowrite progbits
