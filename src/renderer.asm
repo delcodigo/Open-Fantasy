@@ -11,6 +11,7 @@ global rendererDrawSprite
 global rendererDrawMacroSprite
 global rendererClearFrameBuffer
 global rendererFrameBufferResizeCallback
+global rendererDrawTile
 
 section .bss
   frameBuffer resb 245760
@@ -273,6 +274,50 @@ rendererDrawMacroSprite_loop:
   jl rendererDrawMacroSprite_loop
 
   pop rbx
+  pop r15
+  pop r14
+  pop r13
+  pop r12
+  ret
+
+  ; -------------------------------------------------------------
+; rendererDrawTile(rdi: x, rsi: y, rdx: macro_sprite, rcx: palette)
+;
+; Draws 4 8x8 tiles ordered by top-left, top-right, bottom-left and bottom-right
+; each sprite tile share the same palette
+;
+; -------------------------------------------------------------
+rendererDrawTile:
+  push r12
+  push r13
+  push r14
+  push r15
+  
+  xor r15, r15
+  xor r13, r13
+  mov r12, rdx
+  mov r14, rdi
+
+rendererDrawTile_loop:
+  mov rdx, [r12 + r15 * 8]
+  call rendererDrawSprite
+
+  mov rdi, r14
+  add rdi, 8
+  
+  inc r15
+
+  inc r13
+  cmp r13, 2
+  jl rendererDrawTile_loop
+
+  mov rdi, r14
+  xor r13, r13
+  add rsi, 8
+  
+  cmp r15, 4
+  jl rendererDrawTile_loop
+
   pop r15
   pop r14
   pop r13

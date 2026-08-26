@@ -48,9 +48,15 @@ extern rendererDrawSquare
 extern rendererDrawSprite
 extern rendererDrawMacroSprite
 extern rendererFrameBufferResizeCallback
+extern rendererDrawTile
 
 extern warrior_ow_fd
 extern warrior_ow_pal
+
+extern grass_pal
+extern stonepavedRoad_pal
+extern grass_tile
+extern stonepavedRoad_tile
 
 extern dummyAnimationUpdate
 
@@ -185,6 +191,60 @@ _start_window_loop:
   call glClear
 
   call rendererClearFrameBuffer
+
+  mov rdi, 0
+  mov rsi, 0
+  lea rdx, [rel grass_tile]
+  lea rcx, [rel grass_pal]
+  call rendererDrawTile
+
+  mov rdi, 16
+  mov rsi, 0
+  lea rdx, [rel grass_tile]
+  lea rcx, [rel grass_pal]
+  call rendererDrawTile
+
+  mov rdi, 32
+  mov rsi, 0
+  lea rdx, [rel grass_tile]
+  lea rcx, [rel grass_pal]
+  call rendererDrawTile
+
+  mov rdi, 0
+  mov rsi, 16
+  lea rdx, [rel grass_tile]
+  lea rcx, [rel grass_pal]
+  call rendererDrawTile
+
+  mov rdi, 16
+  mov rsi, 16
+  lea rdx, [rel grass_tile]
+  lea rcx, [rel grass_pal]
+  call rendererDrawTile
+
+  mov rdi, 32
+  mov rsi, 16
+  lea rdx, [rel grass_tile]
+  lea rcx, [rel grass_pal]
+  call rendererDrawTile
+
+  mov rdi, 0
+  mov rsi, 32
+  lea rdx, [rel grass_tile]
+  lea rcx, [rel grass_pal]
+  call rendererDrawTile
+
+  mov rdi, 16
+  mov rsi, 32
+  lea rdx, [rel grass_tile]
+  lea rcx, [rel grass_pal]
+  call rendererDrawTile
+
+  mov rdi, 32
+  mov rsi, 32
+  lea rdx, [rel grass_tile]
+  lea rcx, [rel grass_pal]
+  call rendererDrawTile
 
   call dummyAnimationUpdate
   mov r8, rax
