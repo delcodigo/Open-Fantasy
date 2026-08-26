@@ -8,6 +8,8 @@ extern glfwSwapInterval
 extern glfwSwapBuffers
 extern glfwPollEvents
 extern glfwWindowShouldClose
+extern glfwSetFramebufferSizeCallback
+extern glfwMaximizeWindow
 
 extern gladLoadGL
 
@@ -45,6 +47,7 @@ extern rendererUpdateFrameBuffer
 extern rendererDrawSquare
 extern rendererDrawSprite
 extern rendererDrawMacroSprite
+extern rendererFrameBufferResizeCallback
 
 extern warrior_ow_fd
 extern warrior_ow_pal
@@ -143,6 +146,9 @@ _start:
   mov [rel window], rax
 
   mov edi, [rel window]
+  call glfwMaximizeWindow
+
+  mov edi, [rel window]
   call glfwMakeContextCurrent
 
   mov edi, 1
@@ -164,6 +170,15 @@ _start:
 
   call geometryCreateScreen
   call textureCreateScreen
+
+  mov edi, [rel window]
+  lea rsi, [rel rendererFrameBufferResizeCallback]
+  call glfwSetFramebufferSizeCallback
+
+  mov rdi, [rel window]
+  mov esi, 512
+  mov edx, 480
+  call rendererFrameBufferResizeCallback
 
 _start_window_loop:
   mov rdi, 0x4100

@@ -1,5 +1,7 @@
 extern glBindTexture
 extern glTexSubImage2D
+extern glViewport
+
 extern texture
 
 global frameBuffer
@@ -8,6 +10,7 @@ global rendererDrawSquare
 global rendererDrawSprite
 global rendererDrawMacroSprite
 global rendererClearFrameBuffer
+global rendererFrameBufferResizeCallback
 
 section .bss
   frameBuffer resb 245760
@@ -18,6 +21,54 @@ section .data
 section .note.GNU-stack noalloc noexec nowrite progbits
 
 section .text
+
+; edi: window, esi: width, edx: height
+rendererFrameBufferResizeCallback:
+  mov r10d, esi
+  mov r11d, edx
+
+  mov r8d, esi
+  shr r8d, 8
+
+  mov eax, r11d
+  xor edx, edx
+  mov r9d, 240
+  div r9d
+  mov r9d, eax
+
+  mov ecx, r8d
+  cmp ecx, r9d
+  jl rendererFrameBufferResizeCallback_xlessy
+  mov ecx, r9d
+
+rendererFrameBufferResizeCallback_xlessy:
+  cmp ecx, 1
+  jge rendererFrameBufferResizeCallback_scale1orMore
+  mov ecx, 1
+
+rendererFrameBufferResizeCallback_scale1orMore:
+  mov r8d, ecx
+  shl r8d, 8
+
+  mov r9d, ecx
+  imul r9d, 240
+
+  sub r10d, r8d
+  sar r10d, 1
+
+  sub r11d, r9d
+  sar r11d, 1
+
+  mov edi, r10d
+  mov esi, r11d
+  mov edx, r8d
+  mov ecx, r9d
+
+  sub rsp, 8
+  call glViewport
+  add rsp, 8
+
+  ret
 
 rendererClearFrameBuffer:
   lea rdi, [rel frameBuffer]
