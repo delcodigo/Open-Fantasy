@@ -11,6 +11,7 @@ extern glfwWindowShouldClose
 extern glfwSetFramebufferSizeCallback
 extern glfwMaximizeWindow
 extern glfwSetKeyCallback
+extern glfwGetTime
 
 extern gladLoadGL
 
@@ -110,12 +111,16 @@ section .rodata
     dd 1.0, 1.0
     dd 1.0, 0.0
     dd 0.0, 0.0
+  
+  fixedDeltaTime dq 0.016666666666666666
 
 section .data
   window dq 0
   shaderVertexSourcePtr dq shaderVertexSource
   shaderFragmentSourcePtr dq shaderFragmentSource
   shaderProgram dd 0
+  timePrevious dq 0
+  timeAccumulator dq 0
 
 section .bss
   shaderCompileSucess resd 1
@@ -194,6 +199,10 @@ _start:
   lea rsi, [rel inputKeyCallback]
   call glfwSetKeyCallback
 
+  call glfwGetTime
+  movsd [rel timePrevious], xmm0
+  mov qword [rel timeAccumulator], 0
+
 _start_window_loop:
   mov rdi, 0x4100
   call glClear
@@ -254,7 +263,26 @@ _start_window_loop:
   lea rcx, [rel grass_pal]
   call rendererDrawTile
 
+  call glfwGetTime
+  movsd xmm1, xmm0
+  subsd xmm1, [rel timePrevious]
+  addsd xmm1, [rel timeAccumulator]
+  movsd [rel timeAccumulator], xmm1
+  movsd [rel timePrevious], xmm0
+
+_start_window_loop_can_update:
+  movsd xmm0, [rel timeAccumulator]
+  comisd xmm0, [rel fixedDeltaTime]
+  jb _start_window_loop_no_update_yet
+
   call playerOverworld_update
+
+  movsd xmm0, [rel timeAccumulator]
+  subsd xmm0, [rel fixedDeltaTime]
+  movsd [rel timeAccumulator], xmm0
+  jmp _start_window_loop_can_update
+
+_start_window_loop_no_update_yet:
   call playerOverworld_render
 
   call rendererUpdateFrameBuffer

@@ -31,25 +31,25 @@ playerOverworld_update_return:
 playerOverworld_updateMovement:
   cmp byte [inputMap + KEY_UP], 1
   jnz playerOverworld_updateMovement_noUp
-  sub dword [rel playerY], 1
+  sub dword [rel playerY], 0xFFFF
   jmp playerOverworld_updateMovement_return
 
 playerOverworld_updateMovement_noUp:
   cmp byte [inputMap + KEY_LEFT], 1
   jnz playerOverworld_updateMovement_noLeft
-  sub dword [rel playerX], 1
+  sub dword [rel playerX], 0xFFFF
   jmp playerOverworld_updateMovement_return
 
 playerOverworld_updateMovement_noLeft:
   cmp byte [inputMap + KEY_DOWN], 1
   jnz playerOverworld_updateMovement_noDown
-  add dword [rel playerY], 1
+  add dword [rel playerY], 0xFFFF
   jmp playerOverworld_updateMovement_return
 
 playerOverworld_updateMovement_noDown:
   cmp byte [inputMap + KEY_RIGHT], 1
   jnz playerOverworld_updateMovement_return
-  add dword [rel playerX], 1
+  add dword [rel playerX], 0xFFFF
   jmp playerOverworld_updateMovement_return
 
 playerOverworld_updateMovement_return:
@@ -60,8 +60,14 @@ playerOverworld_render:
   call dummyAnimationUpdate
   mov r8, rax
 
-  mov edi, [rel playerX]
-  mov esi, [rel playerY]
+  mov eax, [rel playerX]
+  sar eax, 16
+  mov edi, eax
+
+  mov eax, [rel playerY]
+  sar eax, 16
+  mov esi, eax
+
   lea rax, [rel warrior_ow_fd]
   mov rdx, [rax + r8 * 8]
   lea rcx, [rel warrior_ow_pal]
