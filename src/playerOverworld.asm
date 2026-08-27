@@ -3,6 +3,11 @@
 %define PLAYER_SM_IDLE 0
 %define PLAYER_SM_WALK 1
 
+%define PLAYER_FACE_DOWN 0
+%define PLAYER_FACE_RIGHT 1
+%define PLAYER_FACE_LEFT 2
+%define PLAYER_FACE_UP 3
+
 extern rendererDrawMacroSprite
 
 extern warrior_ow_fd
@@ -25,12 +30,14 @@ section .bss
   playerTX resd 1
   playerTY resd 1
   playerSM resb 1
+  playerFace resb 1
 
 section .text
 
 ; -------------------------------------------------------------
 playerOverworld_init:
   mov byte [rel playerSM], PLAYER_SM_IDLE
+  mov byte [rel playerFace], PLAYER_FACE_DOWN
   ret
 
 ; -------------------------------------------------------------
@@ -145,6 +152,7 @@ playerOverworld_updateMovementKeyPress:
   mov eax, [rel playerY]
   sub eax, 16 << 16
   mov dword [rel playerTY], eax
+  mov byte [rel playerFace], PLAYER_FACE_UP
   jmp playerOverworld_updateMovementKeyPress_return
 
 playerOverworld_updateMovementKeyPress_noUp:
@@ -156,6 +164,7 @@ playerOverworld_updateMovementKeyPress_noUp:
   mov dword [rel playerTX], eax
   mov eax, [rel playerY]
   mov dword [rel playerTY], eax
+  mov byte [rel playerFace], PLAYER_FACE_LEFT
   jmp playerOverworld_updateMovementKeyPress_return
 
 playerOverworld_updateMovementKeyPress_noLeft:
@@ -167,6 +176,7 @@ playerOverworld_updateMovementKeyPress_noLeft:
   mov eax, [rel playerY]
   add eax, 16 << 16
   mov dword [rel playerTY], eax
+  mov byte [rel playerFace], PLAYER_FACE_DOWN
   jmp playerOverworld_updateMovementKeyPress_return
 
 playerOverworld_updateMovementKeyPress_noDown:
@@ -178,9 +188,33 @@ playerOverworld_updateMovementKeyPress_noDown:
   mov dword [rel playerTX], eax
   mov eax, [rel playerY]
   mov dword [rel playerTY], eax
+  mov byte [rel playerFace], PLAYER_FACE_RIGHT
   jmp playerOverworld_updateMovementKeyPress_return
 
 playerOverworld_updateMovementKeyPress_return:
+  ret
+
+; -------------------------------------------------------------
+playerOverworld_getSprite:
+  cmp byte [rel playerFace], PLAYER_FACE_DOWN
+  jnz playerOverworld_getSprite_notDown
+  lea rax, [rel warrior_ow_fd]
+  ret
+
+playerOverworld_getSprite_notDown:
+  cmp byte [rel playerFace], PLAYER_FACE_RIGHT
+  jnz playerOverworld_getSprite_notRight
+  lea rax, [rel warrior_ow_fr]
+  ret
+
+playerOverworld_getSprite_notRight:
+  cmp byte [rel playerFace], PLAYER_FACE_LEFT
+  jnz playerOverworld_getSprite_notLeft
+  lea rax, [rel warrior_ow_fl]
+  ret
+
+playerOverworld_getSprite_notLeft:
+  lea rax, [rel warrior_ow_fu]
   ret
 
 ; -------------------------------------------------------------
@@ -196,7 +230,7 @@ playerOverworld_render:
   sar eax, 16
   mov esi, eax
 
-  lea rax, [rel warrior_ow_fd]
+  call playerOverworld_getSprite
   mov rdx, [rax + r8 * 8]
   lea rcx, [rel warrior_ow_pal]
   call rendererDrawMacroSprite
