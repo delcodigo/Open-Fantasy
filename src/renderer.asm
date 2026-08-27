@@ -4,6 +4,10 @@ extern glViewport
 
 extern texture
 
+extern warrior_ow_fd_tl
+extern warrior_ow_pal_1
+extern grass_tile_1
+
 global frameBuffer
 global rendererUpdateFrameBuffer
 global rendererDrawSquare
@@ -254,8 +258,14 @@ rendererDrawMacroSprite:
   mov rbx, rcx
 
 rendererDrawMacroSprite_loop:
-  mov rdx, [r12 + r15 * 8]
-  mov rcx, [rbx + r15 * 8]
+  movzx eax, byte [r12 + r15]
+  shl rax, 4
+  lea rdx, [rel warrior_ow_fd_tl]
+  add rdx, rax
+  movzx eax, byte [rbx + r15]
+  shl rax, 4
+  lea rcx, [rel warrior_ow_pal_1]
+  add rcx, rax
   call rendererDrawSprite
 
   mov rdi, r14
@@ -281,7 +291,7 @@ rendererDrawMacroSprite_loop:
   pop r12
   ret
 
-  ; -------------------------------------------------------------
+; -------------------------------------------------------------
 ; rendererDrawTile(edi: x, esi: y, rdx: macro_sprite, rcx: palette)
 ;
 ; Draws 4 8x8 tiles ordered by top-left, top-right, bottom-left and bottom-right
@@ -300,7 +310,10 @@ rendererDrawTile:
   mov r14, rdi
 
 rendererDrawTile_loop:
-  mov rdx, [r12 + r15 * 8]
+  movzx rax, byte [r12 + r15]
+  shl rax, 4
+  lea rdx, [rel grass_tile_1]
+  add rdx, rax
   call rendererDrawSprite
 
   mov rdi, r14

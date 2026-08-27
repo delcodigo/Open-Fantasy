@@ -10,6 +10,7 @@
 
 extern rendererDrawMacroSprite
 
+extern warrior_ow_fd_1
 extern warrior_ow_fd
 extern warrior_ow_fr
 extern warrior_ow_fl
@@ -231,7 +232,8 @@ playerOverworld_render:
   mov esi, eax
 
   call playerOverworld_getSprite
-  mov rdx, [rax + r8 * 8]
+  movzx r9d, byte [rax + r8]
+  lea rdx, [warrior_ow_fd_1 + r9d * 4]
   lea rcx, [rel warrior_ow_pal]
   call rendererDrawMacroSprite
 

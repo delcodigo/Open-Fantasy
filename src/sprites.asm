@@ -1,14 +1,17 @@
+global warrior_ow_fd_tl
+global warrior_ow_fd_1
 global warrior_ow_fd
 global warrior_ow_fr
 global warrior_ow_fl
 global warrior_ow_fu
 global warrior_ow_pal
+global warrior_ow_pal_1
 
 section .rodata
-  warrior_ow_pal_1 dd 0x00000000, 0xFF000000, 0xFF3010B2, 0xFFBACBFF
-  warrior_ow_pal_2 dd 0x00000000, 0xFF000000, 0xFFB2B2B2, 0xFF3010B2
+  warrior_ow_pal_1 dd 0x00000000, 0xFF000000, 0xFF3010B2, 0xFFBACBFF ; [0]
+  warrior_ow_pal_2 dd 0x00000000, 0xFF000000, 0xFFB2B2B2, 0xFF3010B2 ; [1]
 
-  warrior_ow_fd_tl:
+  warrior_ow_fd_tl: ; [0]
     db 0b00000000, 0b00010101
     db 0b00000101, 0b01101010
     db 0b00000001, 0b10101010
@@ -18,7 +21,7 @@ section .rodata
     db 0b00000000, 0b01110111
     db 0b00000000, 0b01011111
 
-  warrior_ow_fd_tr:
+  warrior_ow_fd_tr: ; [1]
     db 0b01010100, 0b00000000
     db 0b10101001, 0b00000000
     db 0b10101001, 0b00000000
@@ -28,7 +31,7 @@ section .rodata
     db 0b11011101, 0b00000000
     db 0b11110101, 0b00000000
   
-  warrior_ow_fd_1_bl:
+  warrior_ow_fd_1_bl: ; [2]
     db 0b00000001, 0b10100101
     db 0b00000111, 0b11011110
     db 0b00000101, 0b01011010
@@ -38,7 +41,7 @@ section .rodata
     db 0b00000000, 0b01010100
     db 0b00000000, 0b00000000
 
-  warrior_ow_fd_1_br:
+  warrior_ow_fd_1_br: ; [3]
     db 0b01011010, 0b01000000
     db 0b10110101, 0b01010100
     db 0b10100110, 0b11100100
@@ -48,7 +51,7 @@ section .rodata
     db 0b00010101, 0b00000000
     db 0b00000000, 0b00000000
 
-  warrior_ow_fd_2_bl:
+  warrior_ow_fd_2_bl: ; [4]
     db 0b00000000, 0b01100101
     db 0b00000001, 0b11011110
     db 0b00000001, 0b10011010
@@ -58,7 +61,7 @@ section .rodata
     db 0b00000000, 0b01101001
     db 0b00000000, 0b00010101
 
-  warrior_ow_fd_2_br:
+  warrior_ow_fd_2_br: ; [5]
     db 0b01011010, 0b01000000
     db 0b01010101, 0b01000000
     db 0b01101110, 0b01000000
@@ -68,7 +71,7 @@ section .rodata
     db 0b01010100, 0b00000000
     db 0b00000000, 0b00000000
   
-  warrior_ow_fd_3_bl:
+  warrior_ow_fd_3_bl: ; [6]
     db 0b00000001, 0b10100101
     db 0b00000001, 0b11010110
     db 0b00000001, 0b01101001
@@ -78,7 +81,7 @@ section .rodata
     db 0b00000000, 0b00010101
     db 0b00000000, 0b00000001
 
-  warrior_ow_fd_3_br:
+  warrior_ow_fd_3_br: ; [7]
     db 0b01011001, 0b01010100
     db 0b10110110, 0b01100100
     db 0b10100110, 0b01110100
@@ -88,7 +91,7 @@ section .rodata
     db 0b01101001, 0b00000000
     db 0b01010100, 0b00000000
 
-  warrior_ow_fr_1_tl:
+  warrior_ow_fr_1_tl: ; [8]
     db 0b00000000, 0b01000101
     db 0b00000000, 0b01011010
     db 0b00000000, 0b01101010
@@ -98,7 +101,7 @@ section .rodata
     db 0b00000001, 0b10100111
     db 0b00000000, 0b01010101
 
-  warrior_ow_fr_1_tr:
+  warrior_ow_fr_1_tr: ; [9]
     db 0b01010101, 0b01010000
     db 0b10101010, 0b01000000
     db 0b10111001, 0b00000000
@@ -108,7 +111,7 @@ section .rodata
     db 0b11111101, 0b00000000
     db 0b01010100, 0b00000000
 
-  warrior_ow_fr_2_tl:
+  warrior_ow_fr_2_tl: ; [10]
     db 0b00000000, 0b00000000
     db 0b00000000, 0b01000101
     db 0b00000000, 0b01011010
@@ -118,7 +121,7 @@ section .rodata
     db 0b00000001, 0b10101111
     db 0b00000001, 0b10100111
 
-  warrior_ow_fr_2_tr:
+  warrior_ow_fr_2_tr: ; [11]
     db 0b00000000, 0b00000000
     db 0b01010101, 0b01010000
     db 0b10101010, 0b01000000
@@ -128,7 +131,7 @@ section .rodata
     db 0b11110101, 0b00000000
     db 0b11111101, 0b00000000
   
-  warrior_ow_fr_1_bl:
+  warrior_ow_fr_1_bl: ; [12]
     db 0b00000000, 0b00011010
     db 0b00000000, 0b01100111
     db 0b00000000, 0b01110110
@@ -138,7 +141,7 @@ section .rodata
     db 0b00000000, 0b00011010
     db 0b00000000, 0b00010101
 
-  warrior_ow_fr_1_br:
+  warrior_ow_fr_1_br: ; [13]
     db 0b11010000, 0b00000000
     db 0b11110100, 0b00000000
     db 0b01100100, 0b00000000
@@ -148,7 +151,7 @@ section .rodata
     db 0b10100100, 0b00000000
     db 0b01010100, 0b00000000
   
-  warrior_ow_fr_2_bl:
+  warrior_ow_fr_2_bl: ; [14]
     db 0b00000000, 0b01010101
     db 0b00000000, 0b01100110
     db 0b00000000, 0b01111101
@@ -158,7 +161,7 @@ section .rodata
     db 0b00000110, 0b10100100
     db 0b00000001, 0b01010100
 
-  warrior_ow_fr_2_br:
+  warrior_ow_fr_2_br: ; [15]
     db 0b01010100, 0b00000000
     db 0b11010000, 0b00000000
     db 0b11100100, 0b00000000
@@ -168,7 +171,7 @@ section .rodata
     db 0b00011010, 0b01000000
     db 0b00000101, 0b00000000
 
-  warrior_ow_fr_3_bl:
+  warrior_ow_fr_3_bl: ; [16]
     db 0b00000000, 0b01010101
     db 0b00000000, 0b01110110
     db 0b00000001, 0b01101101
@@ -178,7 +181,7 @@ section .rodata
     db 0b00000110, 0b10100100
     db 0b00000001, 0b01010100
 
-  warrior_ow_fr_3_br:
+  warrior_ow_fr_3_br: ; [17]
     db 0b01010100, 0b00000000
     db 0b11010000, 0b00000000
     db 0b11010000, 0b00000000
@@ -188,7 +191,7 @@ section .rodata
     db 0b00111010, 0b01000000
     db 0b00000101, 0b00000000
 
-  warrior_ow_fl_1_tl:
+  warrior_ow_fl_1_tl: ; [18]
     db 0b00000101, 0b01010101
     db 0b00000001, 0b10101010
     db 0b00000000, 0b01101110
@@ -198,7 +201,7 @@ section .rodata
     db 0b00000000, 0b01111111
     db 0b00000000, 0b00010101
 
-  warrior_ow_fl_1_tr:
+  warrior_ow_fl_1_tr: ; [19]
     db 0b01010001, 0b00000000
     db 0b10100101, 0b00000000
     db 0b10101001, 0b00000000
@@ -208,7 +211,7 @@ section .rodata
     db 0b11011010, 0b01000000
     db 0b01010101, 0b00000000
 
-  warrior_ow_fl_2_tl:
+  warrior_ow_fl_2_tl: ; [20]
     db 0b00000000, 0b00000000
     db 0b00000101, 0b01010101
     db 0b00000001, 0b10101010
@@ -218,7 +221,7 @@ section .rodata
     db 0b00000000, 0b01011111
     db 0b00000000, 0b01111111
 
-  warrior_ow_fl_2_tr:
+  warrior_ow_fl_2_tr: ; [21]
     db 0b00000000, 0b00000000
     db 0b01010001, 0b00000000
     db 0b10100101, 0b00000000
@@ -228,7 +231,7 @@ section .rodata
     db 0b11111010, 0b01000000
     db 0b11011010, 0b01000000
 
-  warrior_ow_fl_1_bl:
+  warrior_ow_fl_1_bl: ; [22]
     db 0b00000000, 0b00000101
     db 0b00000000, 0b00010101
     db 0b00000000, 0b00011011
@@ -238,7 +241,7 @@ section .rodata
     db 0b00000000, 0b00011010
     db 0b00000000, 0b00010101
 
-  warrior_ow_fl_1_br:
+  warrior_ow_fl_1_br: ; [23]
     db 0b10100100, 0b00000000
     db 0b01011001, 0b00000000
     db 0b10011101, 0b00000000
@@ -248,7 +251,7 @@ section .rodata
     db 0b10100100, 0b00000000
     db 0b01010100, 0b00000000
 
-  warrior_ow_fl_2_bl:
+  warrior_ow_fl_2_bl: ; [24]
     db 0b00000000, 0b00010101
     db 0b00000000, 0b01010101
     db 0b00000000, 0b01101110
@@ -258,7 +261,7 @@ section .rodata
     db 0b00000001, 0b10100100
     db 0b00000000, 0b01010000
 
-  warrior_ow_fl_2_br:
+  warrior_ow_fl_2_br: ; [25]
     db 0b01010101, 0b00000000
     db 0b01011001, 0b00000000
     db 0b01111101, 0b00000000
@@ -268,7 +271,7 @@ section .rodata
     db 0b00011010, 0b10010000
     db 0b00010101, 0b01000000
 
-  warrior_ow_fl_3_bl:
+  warrior_ow_fl_3_bl: ; [26]
     db 0b00000000, 0b00010101
     db 0b00000000, 0b00000111
     db 0b00000000, 0b00000111
@@ -278,7 +281,7 @@ section .rodata
     db 0b00000001, 0b10101100
     db 0b00000000, 0b01010000
 
-  warrior_ow_fl_3_br:
+  warrior_ow_fl_3_br: ; [27]
     db 0b01010101, 0b00000000
     db 0b01010101, 0b01000000
     db 0b01101110, 0b01000000
@@ -288,7 +291,7 @@ section .rodata
     db 0b00011010, 0b10010000
     db 0b00010101, 0b01000000
 
-  warrior_ow_fu_tl:
+  warrior_ow_fu_tl: ; [28]
     db 0b00000000, 0b00010101
     db 0b00000000, 0b01101010
     db 0b00000000, 0b01101010
@@ -298,7 +301,7 @@ section .rodata
     db 0b00000000, 0b01101010
     db 0b00000000, 0b01011010
 
-  warrior_ow_fu_tr:
+  warrior_ow_fu_tr: ; [29]
     db 0b01010100, 0b00000000
     db 0b10101001, 0b01010000
     db 0b10101010, 0b01000000
@@ -308,7 +311,7 @@ section .rodata
     db 0b10101001, 0b00000000
     db 0b10100101, 0b00000000
 
-  warrior_ow_fu_1_bl:
+  warrior_ow_fu_1_bl: ; [30]
     db 0b00010101, 0b10100101
     db 0b00011001, 0b01011111
     db 0b00011101, 0b01101010
@@ -318,7 +321,7 @@ section .rodata
     db 0b00000000, 0b00010100
     db 0b00000000, 0b00000000
 
-  warrior_ow_fu_1_br:
+  warrior_ow_fu_1_br: ; [31]
     db 0b01011010, 0b01000000
     db 0b11110101, 0b11010000
     db 0b10101001, 0b01010000
@@ -328,7 +331,7 @@ section .rodata
     db 0b00010101, 0b00000000
     db 0b00000000, 0b00000000
 
-  warrior_ow_fu_2_bl:
+  warrior_ow_fu_2_bl: ; [32]
     db 0b00000000, 0b01100101
     db 0b00000001, 0b01011111
     db 0b00000001, 0b01101010
@@ -338,7 +341,7 @@ section .rodata
     db 0b00000000, 0b01101001
     db 0b00000000, 0b00010101
 
-  warrior_ow_fu_2_br:
+  warrior_ow_fu_2_br: ; [33]
     db 0b01011010, 0b01000000
     db 0b11011111, 0b01000000
     db 0b10011001, 0b01000000
@@ -348,7 +351,7 @@ section .rodata
     db 0b01010100, 0b00000000
     db 0b00000000, 0b00000000
 
-  warrior_ow_fu_3_bl:
+  warrior_ow_fu_3_bl: ; [34]
     db 0b00000101, 0b01010101
     db 0b00000111, 0b10010111
     db 0b00000111, 0b11010110
@@ -358,7 +361,7 @@ section .rodata
     db 0b00000000, 0b00010101
     db 0b00000000, 0b00000000
 
-  warrior_ow_fu_3_br:
+  warrior_ow_fu_3_br: ; [35]
     db 0b01011001, 0b00000000
     db 0b11110101, 0b00000000
     db 0b10101001, 0b00000000
@@ -368,72 +371,27 @@ section .rodata
     db 0b01101001, 0b00000000
     db 0b01010100, 0b00000000
 
-  warrior_ow_fd_1:
-    dq warrior_ow_fd_tl, warrior_ow_fd_tr
-    dq warrior_ow_fd_1_bl, warrior_ow_fd_1_br
+  warrior_ow_fd_1 db 0, 1, 2, 3 ; [0]
+  warrior_ow_fd_2 db 0, 1, 4, 5 ; [1]
+  warrior_ow_fd_3 db 0, 1, 6, 7 ; [2]
 
-  warrior_ow_fd_2:
-    dq warrior_ow_fd_tl, warrior_ow_fd_tr
-    dq warrior_ow_fd_2_bl, warrior_ow_fd_2_br
+  warrior_ow_fr_1 db 8, 9, 12, 13 ; [3]
+  warrior_ow_fr_2 db 10, 11, 14, 15 ; [4]
+  warrior_ow_fr_3 db 10, 11, 16, 17 ; [5]
 
-  warrior_ow_fd_3:
-    dq warrior_ow_fd_tl, warrior_ow_fd_tr
-    dq warrior_ow_fd_3_bl, warrior_ow_fd_3_br
+  warrior_ow_fl_1 db 18, 19, 22, 23 ; [6]
+  warrior_ow_fl_2 db 20, 21, 24, 25 ; [7]
+  warrior_ow_fl_3 db 20, 21, 26, 27 ; [8]
 
-  warrior_ow_fr_1:
-    dq warrior_ow_fr_1_tl, warrior_ow_fr_1_tr
-    dq warrior_ow_fr_1_bl, warrior_ow_fr_1_br
-
-  warrior_ow_fr_2:
-    dq warrior_ow_fr_2_tl, warrior_ow_fr_2_tr
-    dq warrior_ow_fr_2_bl, warrior_ow_fr_2_br
-
-  warrior_ow_fr_3:
-    dq warrior_ow_fr_2_tl, warrior_ow_fr_2_tr
-    dq warrior_ow_fr_3_bl, warrior_ow_fr_3_br
-
-  warrior_ow_fl_1:
-    dq warrior_ow_fl_1_tl, warrior_ow_fl_1_tr
-    dq warrior_ow_fl_1_bl, warrior_ow_fl_1_br
-
-  warrior_ow_fl_2:
-    dq warrior_ow_fl_2_tl, warrior_ow_fl_2_tr
-    dq warrior_ow_fl_2_bl, warrior_ow_fl_2_br
-
-  warrior_ow_fl_3:
-    dq warrior_ow_fl_2_tl, warrior_ow_fl_2_tr
-    dq warrior_ow_fl_3_bl, warrior_ow_fl_3_br
-
-  warrior_ow_fu_1:
-    dq warrior_ow_fu_tl, warrior_ow_fu_tr
-    dq warrior_ow_fu_1_bl, warrior_ow_fu_1_br
-
-  warrior_ow_fu_2:
-    dq warrior_ow_fu_tl, warrior_ow_fu_tr
-    dq warrior_ow_fu_2_bl, warrior_ow_fu_2_br
-
-  warrior_ow_fu_3:
-    dq warrior_ow_fu_tl, warrior_ow_fu_tr
-    dq warrior_ow_fu_3_bl, warrior_ow_fu_3_br
+  warrior_ow_fu_1 db 28, 29, 30, 31 ; [9]
+  warrior_ow_fu_2 db 28, 29, 32, 33 ; [10]
+  warrior_ow_fu_3 db 28, 29, 34, 35 ; [11]
   
-  warrior_ow_fd:
-    dq warrior_ow_fd_1, warrior_ow_fd_2
-    dq warrior_ow_fd_1, warrior_ow_fd_3
+  warrior_ow_fd db 0, 1, 0, 2
+  warrior_ow_fr db 3, 4, 3, 5
+  warrior_ow_fl db 6, 7, 6, 8
+  warrior_ow_fu db 9, 10, 9, 11
 
-  warrior_ow_fr:
-    dq warrior_ow_fr_1, warrior_ow_fr_2
-    dq warrior_ow_fr_1, warrior_ow_fr_3
-
-  warrior_ow_fl:
-    dq warrior_ow_fl_1, warrior_ow_fl_2
-    dq warrior_ow_fl_1, warrior_ow_fl_3
-
-  warrior_ow_fu:
-    dq warrior_ow_fu_1, warrior_ow_fu_2
-    dq warrior_ow_fu_1, warrior_ow_fu_3
-
-  warrior_ow_pal:
-    dq warrior_ow_pal_1, warrior_ow_pal_1
-    dq warrior_ow_pal_2, warrior_ow_pal_2
+  warrior_ow_pal db 0, 0, 1, 1
 
 section .note.GNU-stack noalloc noexec nowrite progbits
