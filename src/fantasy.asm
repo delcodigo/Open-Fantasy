@@ -13,8 +13,6 @@ extern glfwMaximizeWindow
 extern glfwSetKeyCallback
 extern glfwGetTime
 
-extern gladLoadGL
-
 extern glClearColor
 extern glClear
 extern glCreateShader
@@ -72,7 +70,6 @@ section .rodata
   gameExitSuccesfully db "The fantasy is over.", 10, 0
   glfwInitErrorMessage db "Failed to initialize GLFW", 10, 0
   glfwInitWindowErrorMessage db "Failed to create window", 10, 0
-  gladLoadError db "Failed to load OpenGL functions", 10, 0
   shaderCompileFailedMsg db "Failed to compile the shader", 10, 0
   shaderLinkFailedMsg db "Program linking failed", 10, 0
   windowTitle db "Open Fantasy", 0
@@ -169,10 +166,6 @@ _start:
 
   mov edi, 1
   call glfwSwapInterval
-
-  call gladLoadGL
-  test eax, eax
-  jz _start_glad_load_error
 
   movss xmm0, [rel clearColor0_1]
   movss xmm1, [rel clearColor0_1]
@@ -317,14 +310,6 @@ _start_glfw_window_error:
   call glfwTerminate
   lea rdi, [rel glfwInitWindowErrorMessage]
   call sys_print
-  call sys_exit
-
-_start_glad_load_error:
-  lea rdi, [rel gladLoadError]
-  call sys_print
-  mov rdi, [rel window]
-  call glfwDestroyWindow
-  call glfwTerminate
   call sys_exit
 
 ; -------------------------------------------------------------

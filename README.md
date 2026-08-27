@@ -17,7 +17,6 @@ engine, no scripting layer, just syscalls, registers, and stack frames.
 - I'm allowing myself a small set of C libraries for the stuff that isn't
   worth reinventing (windowing, graphics context, OS differences):
   - [GLFW](https://www.glfw.org/) — window/context/input handling
-  - [glad](https://glad.dav1d.de/) — OpenGL function loading
   - [miniaudio](https://miniaudio.dev/) — audio playback (planned, not wired
     up yet)
 - Everything else (sprite rendering, game state, entities, whatever a JRPG
@@ -30,8 +29,8 @@ support is a maybe-later.
 
 ## Building
 
-Requires `nasm`, `gcc`, and `ld`, plus GLFW and OpenGL development
-libraries installed on the system.
+Requires `nasm` and `ld`, plus GLFW and OpenGL development libraries
+installed on the system.
 
 ```sh
 make        # build bin/fantasy
@@ -43,7 +42,6 @@ make clean  # remove build/ and bin/
 
 ```
 fantasy.asm           entry point and game code
-dependencies/         vendored C dependencies (currently glad)
 build/                object files (gitignored)
 bin/                  final binary (gitignored)
 ```
