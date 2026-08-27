@@ -1,4 +1,7 @@
 global warrior_ow_fd
+global warrior_ow_fr
+global warrior_ow_fl
+global warrior_ow_fu
 global warrior_ow_pal
 
 section .rodata
@@ -85,6 +88,286 @@ section .rodata
     db 0b01101001, 0b01010100
     db 0b01010100, 0b00000000
 
+  warrior_ow_fr_1_tl:
+    db 0b00000000, 0b01000101
+    db 0b00000000, 0b01011010
+    db 0b00000000, 0b01101010
+    db 0b00000001, 0b10101010
+    db 0b00000001, 0b10101110
+    db 0b00000001, 0b10101111
+    db 0b00000001, 0b10100111
+    db 0b00000000, 0b01010101
+
+  warrior_ow_fr_1_tr:
+    db 0b01010101, 0b01010000
+    db 0b10101010, 0b01000000
+    db 0b10111001, 0b00000000
+    db 0b10010110, 0b01000000
+    db 0b11110101, 0b00000000
+    db 0b11110101, 0b00000000
+    db 0b11111101, 0b00000000
+    db 0b01010100, 0b00000000
+
+  warrior_ow_fr_2_tl:
+    db 0b00000000, 0b00000000
+    db 0b00000000, 0b01000101
+    db 0b00000000, 0b01011010
+    db 0b00000000, 0b01101010
+    db 0b00000001, 0b10101010
+    db 0b00000001, 0b10101110
+    db 0b00000001, 0b10101111
+    db 0b00000001, 0b10100111
+
+  warrior_ow_fr_2_tr:
+    db 0b00000000, 0b00000000
+    db 0b01010101, 0b01010000
+    db 0b10101010, 0b01000000
+    db 0b10111001, 0b00000000
+    db 0b10010110, 0b01000000
+    db 0b11110101, 0b00000000
+    db 0b11110101, 0b00000000
+    db 0b11111101, 0b00000000
+  
+  warrior_ow_fr_1_bl:
+    db 0b00000000, 0b00011010
+    db 0b00000000, 0b01100111
+    db 0b00000000, 0b01110110
+    db 0b00000000, 0b01100101
+    db 0b00000000, 0b00010110
+    db 0b00000000, 0b00011001
+    db 0b00000000, 0b00011010
+    db 0b00000000, 0b00010101
+
+  warrior_ow_fr_1_br:
+    db 0b11010000, 0b00000000
+    db 0b11110100, 0b00000000
+    db 0b01100100, 0b00000000
+    db 0b01110100, 0b00000000
+    db 0b10110100, 0b00000000
+    db 0b01010000, 0b00000000
+    db 0b10100100, 0b00000000
+    db 0b01010100, 0b00000000
+  
+  warrior_ow_fr_2_bl:
+    db 0b00000000, 0b01010101
+    db 0b00000000, 0b01100110
+    db 0b00000000, 0b01111101
+    db 0b00000000, 0b01101001
+    db 0b00000001, 0b10010110
+    db 0b00000110, 0b10010001
+    db 0b00000110, 0b10100100
+    db 0b00000001, 0b01010100
+
+  warrior_ow_fr_2_br:
+    db 0b01010100, 0b00000000
+    db 0b11010000, 0b00000000
+    db 0b11100100, 0b00000000
+    db 0b01101001, 0b00000000
+    db 0b11011001, 0b01000000
+    db 0b11010110, 0b10010000
+    db 0b00011010, 0b01000000
+    db 0b00000101, 0b00000000
+
+  warrior_ow_fr_3_bl:
+    db 0b00000000, 0b01010101
+    db 0b00000000, 0b01110110
+    db 0b00000001, 0b01101101
+    db 0b00000001, 0b10101001
+    db 0b00000001, 0b10100110
+    db 0b00000110, 0b01010001
+    db 0b00000110, 0b10100100
+    db 0b00000001, 0b01010100
+
+  warrior_ow_fr_3_br:
+    db 0b01010100, 0b00000000
+    db 0b11010000, 0b00000000
+    db 0b11010000, 0b00000000
+    db 0b01100100, 0b00000000
+    db 0b11111001, 0b01000000
+    db 0b11110110, 0b10010000
+    db 0b00111010, 0b01000000
+    db 0b00000101, 0b00000000
+
+  warrior_ow_fl_1_tl:
+    db 0b00000101, 0b01010101
+    db 0b00000001, 0b10101010
+    db 0b00000000, 0b01101110
+    db 0b00000001, 0b10010110
+    db 0b00000000, 0b01011111
+    db 0b00000000, 0b01011111
+    db 0b00000000, 0b01111111
+    db 0b00000000, 0b00010101
+
+  warrior_ow_fl_1_tr:
+    db 0b01010001, 0b00000000
+    db 0b10100101, 0b00000000
+    db 0b10101001, 0b00000000
+    db 0b10101010, 0b01000000
+    db 0b10111010, 0b01000000
+    db 0b11111010, 0b01000000
+    db 0b11011010, 0b01000000
+    db 0b01010101, 0b00000000
+
+  warrior_ow_fl_2_tl:
+    db 0b00000000, 0b00000000
+    db 0b00000101, 0b01010101
+    db 0b00000001, 0b10101010
+    db 0b00000000, 0b01101110
+    db 0b00000001, 0b10010110
+    db 0b00000000, 0b01011111
+    db 0b00000000, 0b01011111
+    db 0b00000000, 0b01111111
+
+  warrior_ow_fl_2_tr:
+    db 0b00000000, 0b00000000
+    db 0b01010001, 0b00000000
+    db 0b10100101, 0b00000000
+    db 0b10101001, 0b00000000
+    db 0b10101010, 0b01000000
+    db 0b10111010, 0b01000000
+    db 0b11111010, 0b01000000
+    db 0b11011010, 0b01000000
+
+  warrior_ow_fl_1_bl:
+    db 0b00000000, 0b00000101
+    db 0b00000000, 0b00010101
+    db 0b00000000, 0b00011011
+    db 0b00000000, 0b00011111
+    db 0b00000000, 0b00011011
+    db 0b00000000, 0b00000101
+    db 0b00000000, 0b00011010
+    db 0b00000000, 0b00010101
+
+  warrior_ow_fl_1_br:
+    db 0b10100100, 0b00000000
+    db 0b01011001, 0b00000000
+    db 0b10011101, 0b00000000
+    db 0b11011001, 0b00000000
+    db 0b10010100, 0b00000000
+    db 0b01100100, 0b00000000
+    db 0b10100100, 0b00000000
+    db 0b01010100, 0b00000000
+
+  warrior_ow_fl_2_bl:
+    db 0b00000000, 0b00010101
+    db 0b00000000, 0b01010101
+    db 0b00000000, 0b01101110
+    db 0b00000000, 0b01111111
+    db 0b00000001, 0b01101110
+    db 0b00000110, 0b10010101
+    db 0b00000001, 0b10100100
+    db 0b00000000, 0b01010000
+
+  warrior_ow_fl_2_br:
+    db 0b01010101, 0b00000000
+    db 0b01011001, 0b00000000
+    db 0b01111101, 0b00000000
+    db 0b01101001, 0b00000000
+    db 0b01010110, 0b01000000
+    db 0b00000110, 0b10010000
+    db 0b00011010, 0b10010000
+    db 0b00010101, 0b01000000
+
+  warrior_ow_fl_3_bl:
+    db 0b00000000, 0b00010101
+    db 0b00000000, 0b00000111
+    db 0b00000000, 0b00000111
+    db 0b00000000, 0b00011001
+    db 0b00000001, 0b01101111
+    db 0b00000110, 0b10011111
+    db 0b00000001, 0b10101100
+    db 0b00000000, 0b01010000
+
+  warrior_ow_fl_3_br:
+    db 0b01010101, 0b00000000
+    db 0b01010101, 0b01000000
+    db 0b01101110, 0b01000000
+    db 0b01111111, 0b01000000
+    db 0b01101110, 0b01000000
+    db 0b01010101, 0b10010000
+    db 0b00011010, 0b10010000
+    db 0b00010101, 0b01000000
+
+  warrior_ow_fu_tl:
+    db 0b00000000, 0b00010101
+    db 0b00000000, 0b01101010
+    db 0b00000000, 0b01101010
+    db 0b00000001, 0b10101010
+    db 0b00000001, 0b10101010
+    db 0b00000000, 0b01101010
+    db 0b00000000, 0b01101010
+    db 0b00000000, 0b01011010
+
+  warrior_ow_fu_tr:
+    db 0b01010100, 0b00000000
+    db 0b10101001, 0b01010000
+    db 0b10101010, 0b01000000
+    db 0b10101010, 0b10010000
+    db 0b10101010, 0b01000000
+    db 0b10101010, 0b01000000
+    db 0b10101001, 0b00000000
+    db 0b10100101, 0b00000000
+
+  warrior_ow_fu_1_bl:
+    db 0b00010101, 0b10100101
+    db 0b00011001, 0b01011111
+    db 0b00011101, 0b01101010
+    db 0b00011001, 0b01010111
+    db 0b00000101, 0b01010111
+    db 0b00000000, 0b01101001
+    db 0b00000000, 0b00010100
+    db 0b00000000, 0b00000000
+
+  warrior_ow_fu_1_br:
+    db 0b01011010, 0b01000000
+    db 0b11110101, 0b11010000
+    db 0b10101001, 0b01010000
+    db 0b11010101, 0b10010000
+    db 0b11011001, 0b01000000
+    db 0b01101010, 0b01000000
+    db 0b00010101, 0b00000000
+    db 0b00000000, 0b00000000
+
+  warrior_ow_fu_2_bl:
+    db 0b00000000, 0b01100101
+    db 0b00000001, 0b01011111
+    db 0b00000001, 0b01101010
+    db 0b00000001, 0b01010111
+    db 0b00000001, 0b01010111
+    db 0b00000000, 0b01101001
+    db 0b00000000, 0b01101001
+    db 0b00000000, 0b00010101
+
+  warrior_ow_fu_2_br:
+    db 0b01011010, 0b01000000
+    db 0b11011111, 0b01000000
+    db 0b10011001, 0b01000000
+    db 0b11011010, 0b01000000
+    db 0b11011010, 0b01000000
+    db 0b01010101, 0b00000000
+    db 0b01010100, 0b00000000
+    db 0b00000000, 0b00000000
+
+  warrior_ow_fu_3_bl:
+    db 0b00000101, 0b01010101
+    db 0b00000111, 0b10010111
+    db 0b00000111, 0b11010110
+    db 0b00000111, 0b10010111
+    db 0b00000101, 0b01100111
+    db 0b00000000, 0b01010101
+    db 0b00000000, 0b00010101
+    db 0b00000000, 0b00000000
+
+  warrior_ow_fu_3_br:
+    db 0b01011001, 0b00000000
+    db 0b11110101, 0b00000000
+    db 0b10101001, 0b00000000
+    db 0b11010101, 0b00000000
+    db 0b11010101, 0b00000000
+    db 0b01101001, 0b00000000
+    db 0b01101001, 0b00000000
+    db 0b01010100, 0b00000000
+
   warrior_ow_fd_1:
     dq warrior_ow_fd_tl, warrior_ow_fd_tr
     dq warrior_ow_fd_1_bl, warrior_ow_fd_1_br
@@ -96,10 +379,58 @@ section .rodata
   warrior_ow_fd_3:
     dq warrior_ow_fd_tl, warrior_ow_fd_tr
     dq warrior_ow_fd_3_bl, warrior_ow_fd_3_br
+
+  warrior_ow_fr_1:
+    dq warrior_ow_fr_1_tl, warrior_ow_fr_1_tr
+    dq warrior_ow_fr_1_bl, warrior_ow_fr_1_br
+
+  warrior_ow_fr_2:
+    dq warrior_ow_fr_2_tl, warrior_ow_fr_2_tr
+    dq warrior_ow_fr_2_bl, warrior_ow_fr_2_br
+
+  warrior_ow_fr_3:
+    dq warrior_ow_fr_2_tl, warrior_ow_fr_2_tr
+    dq warrior_ow_fr_3_bl, warrior_ow_fr_3_br
+
+  warrior_ow_fl_1:
+    dq warrior_ow_fl_1_tl, warrior_ow_fl_1_tr
+    dq warrior_ow_fl_1_bl, warrior_ow_fl_1_br
+
+  warrior_ow_fl_2:
+    dq warrior_ow_fl_2_tl, warrior_ow_fl_2_tr
+    dq warrior_ow_fl_2_bl, warrior_ow_fl_2_br
+
+  warrior_ow_fl_3:
+    dq warrior_ow_fl_2_tl, warrior_ow_fl_2_tr
+    dq warrior_ow_fl_3_bl, warrior_ow_fl_3_br
+
+  warrior_ow_fu_1:
+    dq warrior_ow_fu_tl, warrior_ow_fu_tr
+    dq warrior_ow_fu_1_bl, warrior_ow_fu_1_br
+
+  warrior_ow_fu_2:
+    dq warrior_ow_fu_tl, warrior_ow_fu_tr
+    dq warrior_ow_fu_2_bl, warrior_ow_fu_2_br
+
+  warrior_ow_fu_3:
+    dq warrior_ow_fu_tl, warrior_ow_fu_tr
+    dq warrior_ow_fu_3_bl, warrior_ow_fu_3_br
   
   warrior_ow_fd:
     dq warrior_ow_fd_1, warrior_ow_fd_2
     dq warrior_ow_fd_1, warrior_ow_fd_3
+
+  warrior_ow_fr:
+    dq warrior_ow_fr_1, warrior_ow_fr_2
+    dq warrior_ow_fr_1, warrior_ow_fr_3
+
+  warrior_ow_fl:
+    dq warrior_ow_fl_1, warrior_ow_fl_2
+    dq warrior_ow_fl_1, warrior_ow_fl_3
+
+  warrior_ow_fu:
+    dq warrior_ow_fu_1, warrior_ow_fu_2
+    dq warrior_ow_fu_1, warrior_ow_fu_3
 
   warrior_ow_pal:
     dq warrior_ow_pal_1, warrior_ow_pal_1

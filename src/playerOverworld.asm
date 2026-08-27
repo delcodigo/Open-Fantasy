@@ -6,23 +6,32 @@
 extern rendererDrawMacroSprite
 
 extern warrior_ow_fd
+extern warrior_ow_fr
+extern warrior_ow_fl
+extern warrior_ow_fu
 extern warrior_ow_pal
 
 extern inputMap
 
 extern dummyAnimationUpdate
 
+global playerOverworld_init
 global playerOverworld_update
 global playerOverworld_render
 
-section .data
-  playerX dd 0
-  playerY dd 0
-  playerSM db PLAYER_SM_IDLE
-  playerTX dd 0
-  playerTY dd 0
+section .bss
+  playerX resd 1
+  playerY resd 1
+  playerTX resd 1
+  playerTY resd 1
+  playerSM resb 1
 
 section .text
+
+; -------------------------------------------------------------
+playerOverworld_init:
+  mov byte [rel playerSM], PLAYER_SM_IDLE
+  ret
 
 ; -------------------------------------------------------------
 playerOverworld_update:

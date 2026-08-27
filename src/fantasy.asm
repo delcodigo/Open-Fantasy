@@ -62,6 +62,7 @@ extern stonepavedRoad_tile
 
 extern inputKeyCallback
 
+extern playerOverworld_init
 extern playerOverworld_update
 extern playerOverworld_render
 
@@ -202,6 +203,8 @@ _start:
   call glfwGetTime
   movsd [rel timePrevious], xmm0
   mov qword [rel timeAccumulator], 0
+
+  call playerOverworld_init
 
 _start_window_loop:
   mov rdi, 0x4100
