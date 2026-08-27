@@ -1,5 +1,8 @@
 %include "src/constants.inc"
 
+%define PLAYER_SM_IDLE 0
+%define PLAYER_SM_WALK 1
+
 extern rendererDrawMacroSprite
 
 extern warrior_ow_fd
@@ -15,11 +18,25 @@ global playerOverworld_render
 section .data
   playerX dd 0
   playerY dd 0
+  playerSM db PLAYER_SM_IDLE
+  playerTX dd 0
+  playerTY dd 0
 
 section .text
 
 ; -------------------------------------------------------------
 playerOverworld_update:
+  cmp byte [rel playerSM], PLAYER_SM_IDLE
+  jz playerOverworld_update_idle
+  cmp byte [rel playerSM], PLAYER_SM_WALK
+  jz playerOverworld_update_walk
+
+playerOverworld_update_idle:
+  call playerOverworld_updateMovementKeyPress
+  test rax, rax
+  jnz playerOverworld_update_return
+
+playerOverworld_update_walk:
   call playerOverworld_updateMovement
   test rax, rax
   jnz playerOverworld_update_return
@@ -28,31 +45,133 @@ playerOverworld_update_return:
   ret
 
 ; -------------------------------------------------------------
+; rdi: isPositiveMovement
+; -------------------------------------------------------------
+playerOverworld_updateMovementCheckFinish:
+  test rdi, rdi
+  jnz playerOverworld_updateMovementCheckFinish_positive
+  
+  mov eax, [rel playerTX]
+  cmp [rel playerX], eax
+  jg playerOverworld_updateMovementCheckFinish_false
+
+  mov eax, [rel playerTY]
+  cmp [rel playerY], eax
+  jg playerOverworld_updateMovementCheckFinish_false
+
+  jmp playerOverworld_updateMovementCheckFinish_true
+
+playerOverworld_updateMovementCheckFinish_positive:
+  mov eax, [rel playerTX]
+  cmp [rel playerX], eax
+  jl playerOverworld_updateMovementCheckFinish_false
+
+  mov eax, [rel playerTY]
+  cmp [rel playerY], eax
+  jl playerOverworld_updateMovementCheckFinish_false
+
+playerOverworld_updateMovementCheckFinish_true:
+  mov eax, [rel playerTX]
+  mov dword [rel playerX], eax
+  mov eax, [rel playerTY]
+  mov dword [rel playerY], eax
+  mov byte [rel playerSM], PLAYER_SM_IDLE
+  mov eax, 1
+  ret
+
+playerOverworld_updateMovementCheckFinish_false:
+  xor eax, eax
+  ret
+
+; -------------------------------------------------------------
 playerOverworld_updateMovement:
-  cmp byte [inputMap + KEY_UP], 1
-  jnz playerOverworld_updateMovement_noUp
-  sub dword [rel playerY], 0xFFFF
-  jmp playerOverworld_updateMovement_return
+  mov eax, [rel playerX]
+  cmp [rel playerTX], eax
+  jz playerOverworld_updateMovement_verticalCheck
+  jg playerOverworld_updateMovement_moveRight
 
-playerOverworld_updateMovement_noUp:
-  cmp byte [inputMap + KEY_LEFT], 1
-  jnz playerOverworld_updateMovement_noLeft
-  sub dword [rel playerX], 0xFFFF
-  jmp playerOverworld_updateMovement_return
+  sub dword [rel playerX], 0x10000
 
-playerOverworld_updateMovement_noLeft:
-  cmp byte [inputMap + KEY_DOWN], 1
-  jnz playerOverworld_updateMovement_noDown
-  add dword [rel playerY], 0xFFFF
-  jmp playerOverworld_updateMovement_return
+  xor rdi, rdi
+  call playerOverworld_updateMovementCheckFinish
+  ret
 
-playerOverworld_updateMovement_noDown:
-  cmp byte [inputMap + KEY_RIGHT], 1
-  jnz playerOverworld_updateMovement_return
-  add dword [rel playerX], 0xFFFF
-  jmp playerOverworld_updateMovement_return
+playerOverworld_updateMovement_moveRight:
+  add dword [rel playerX], 0x10000
 
-playerOverworld_updateMovement_return:
+  mov rdi, 1
+  call playerOverworld_updateMovementCheckFinish
+  ret
+
+playerOverworld_updateMovement_verticalCheck:
+  mov eax, [rel playerY]
+  cmp [rel playerTY], eax
+  jz playerOverworld_updateMovement_false
+  jg playerOverworld_updateMovement_moveDown
+
+  sub dword [rel playerY], 0x10000
+
+  xor rdi, rdi
+  call playerOverworld_updateMovementCheckFinish
+  ret
+
+playerOverworld_updateMovement_moveDown:
+  add dword [rel playerY], 0x10000
+
+  mov rdi, 1
+  call playerOverworld_updateMovementCheckFinish
+  ret
+
+playerOverworld_updateMovement_false:
+  xor eax, eax
+  ret
+
+; -------------------------------------------------------------
+playerOverworld_updateMovementKeyPress:
+  cmp byte [rel inputMap + KEY_UP], 1
+  jnz playerOverworld_updateMovementKeyPress_noUp
+  mov byte [rel playerSM], PLAYER_SM_WALK
+  mov eax, [rel playerX]
+  mov dword [rel playerTX], eax
+  mov eax, [rel playerY]
+  sub eax, 16 << 16
+  mov dword [rel playerTY], eax
+  jmp playerOverworld_updateMovementKeyPress_return
+
+playerOverworld_updateMovementKeyPress_noUp:
+  cmp byte [rel inputMap + KEY_LEFT], 1
+  jnz playerOverworld_updateMovementKeyPress_noLeft
+  mov byte [rel playerSM], PLAYER_SM_WALK
+  mov eax, [rel playerX]
+  sub eax, 16 << 16
+  mov dword [rel playerTX], eax
+  mov eax, [rel playerY]
+  mov dword [rel playerTY], eax
+  jmp playerOverworld_updateMovementKeyPress_return
+
+playerOverworld_updateMovementKeyPress_noLeft:
+  cmp byte [rel inputMap + KEY_DOWN], 1
+  jnz playerOverworld_updateMovementKeyPress_noDown
+  mov byte [rel playerSM], PLAYER_SM_WALK
+  mov eax, [rel playerX]
+  mov dword [rel playerTX], eax
+  mov eax, [rel playerY]
+  add eax, 16 << 16
+  mov dword [rel playerTY], eax
+  jmp playerOverworld_updateMovementKeyPress_return
+
+playerOverworld_updateMovementKeyPress_noDown:
+  cmp byte [rel inputMap + KEY_RIGHT], 1
+  jnz playerOverworld_updateMovementKeyPress_return
+  mov byte [rel playerSM], PLAYER_SM_WALK
+  mov eax, [rel playerX]
+  add eax, 16 << 16
+  mov dword [rel playerTX], eax
+  mov eax, [rel playerY]
+  mov dword [rel playerTY], eax
+  jmp playerOverworld_updateMovementKeyPress_return
+
+playerOverworld_updateMovementKeyPress_return:
   ret
 
 ; -------------------------------------------------------------
