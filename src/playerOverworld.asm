@@ -8,6 +8,8 @@
 %define PLAYER_FACE_LEFT 2
 %define PLAYER_FACE_UP 3
 
+%define MOVEMENT_SPEED 0x11111
+
 extern rendererDrawMacroSprite
 
 extern warrior_ow_fd_1
@@ -19,7 +21,8 @@ extern warrior_ow_pal
 
 extern inputMap
 
-extern dummyAnimationUpdate
+extern spriteAnimationRoundFrame
+extern spriteAnimationUpdate
 
 global playerOverworld_init
 global playerOverworld_update
@@ -30,6 +33,7 @@ section .bss
   playerY resd 1
   playerTX resd 1
   playerTY resd 1
+  playerFI resd 1
   playerSM resb 1
   playerFace resb 1
 
@@ -37,8 +41,6 @@ section .text
 
 ; -------------------------------------------------------------
 playerOverworld_init:
-  mov byte [rel playerSM], PLAYER_SM_IDLE
-  mov byte [rel playerFace], PLAYER_FACE_DOWN
   ret
 
 ; -------------------------------------------------------------
@@ -94,6 +96,11 @@ playerOverworld_updateMovementCheckFinish_true:
   mov dword [rel playerY], eax
   mov byte [rel playerSM], PLAYER_SM_IDLE
   mov eax, 1
+  
+  lea rdi, [rel playerFI]
+  call spriteAnimationRoundFrame
+
+  call playerOverworld_updateMovementKeyPress
   ret
 
 playerOverworld_updateMovementCheckFinish_false:
@@ -107,14 +114,14 @@ playerOverworld_updateMovement:
   jz playerOverworld_updateMovement_verticalCheck
   jg playerOverworld_updateMovement_moveRight
 
-  sub dword [rel playerX], 0x10000
+  sub dword [rel playerX], MOVEMENT_SPEED
 
   xor rdi, rdi
   call playerOverworld_updateMovementCheckFinish
   ret
 
 playerOverworld_updateMovement_moveRight:
-  add dword [rel playerX], 0x10000
+  add dword [rel playerX], MOVEMENT_SPEED
 
   mov rdi, 1
   call playerOverworld_updateMovementCheckFinish
@@ -126,14 +133,14 @@ playerOverworld_updateMovement_verticalCheck:
   jz playerOverworld_updateMovement_false
   jg playerOverworld_updateMovement_moveDown
 
-  sub dword [rel playerY], 0x10000
+  sub dword [rel playerY], MOVEMENT_SPEED
 
   xor rdi, rdi
   call playerOverworld_updateMovementCheckFinish
   ret
 
 playerOverworld_updateMovement_moveDown:
-  add dword [rel playerY], 0x10000
+  add dword [rel playerY], MOVEMENT_SPEED
 
   mov rdi, 1
   call playerOverworld_updateMovementCheckFinish
@@ -219,8 +226,20 @@ playerOverworld_getSprite_notLeft:
   ret
 
 ; -------------------------------------------------------------
+playerOverworld_updateAnimationFrame:
+  cmp byte [rel playerSM], PLAYER_SM_IDLE
+  jz playerOverworld_updateAnimationFrame_idle
+  lea rdi, [rel playerFI]
+  call spriteAnimationUpdate
+  ret
+
+playerOverworld_updateAnimationFrame_idle:
+  xor rax, rax
+  ret
+
+; -------------------------------------------------------------
 playerOverworld_render:
-  call dummyAnimationUpdate
+  call playerOverworld_updateAnimationFrame
   mov r8, rax
 
   mov eax, [rel playerX]
