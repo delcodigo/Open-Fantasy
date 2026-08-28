@@ -41,7 +41,9 @@ make clean  # remove build/ and bin/
 ## Layout
 
 ```
-fantasy.asm           entry point and game code
+src/                  game source (assembly)
+  fantasy.asm           entry point and main loop
+  constants.inc         shared constants (key codes, etc.)
 build/                object files (gitignored)
 bin/                  final binary (gitignored)
 ```
