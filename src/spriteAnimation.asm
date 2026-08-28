@@ -2,8 +2,8 @@ global spriteAnimationUpdate
 global spriteAnimationRoundFrame
 
 section .rodata
-  frameSpeed dd 0.13333333
-  frameCount dd 4.0
+  frameSpeed dd 0x00002222
+  frameCount dd 4 << 16
 
 section .text
 
@@ -11,30 +11,31 @@ section .text
 ; rdi: pointer to frameIndex
 ; -------------------------------------------------------------
 spriteAnimationRoundFrame:
-  movss xmm0, [rdi]
-  cvtss2si r8d, xmm0
-  cvtsi2ss xmm0, r8d
-  movss [rdi], xmm0
+  mov eax, [rdi]
+  add eax, 0x8000
+  and eax, 0xFFFF0000
+  mov [rdi], eax
+  ret
 
 ; -------------------------------------------------------------
 ; rdi: pointer to frameIndex
 ; -------------------------------------------------------------
 spriteAnimationUpdate:
-  movss xmm0, [rdi]
-  addss xmm0, [rel frameSpeed]
+  mov eax, [rdi]
+  add eax, [rel frameSpeed]
 
 spriteAnimationUpdate_updateFrame:
-  cvttss2si r8d, xmm0
-  movss [rdi], xmm0
+  mov [rdi], eax
+  sar eax, 16
   
-  cmp r8d, 4
+  cmp eax, 4
   jl spriteAnimationUpdate_return
 
-  subss xmm0, [rel frameCount]
+  shl eax, 16
+  sub eax, [rel frameCount]
   jmp spriteAnimationUpdate_updateFrame
 
 spriteAnimationUpdate_return:
-  mov eax, r8d
   ret
 
 section .note.GNU-stack noalloc noexec nowrite progbits
