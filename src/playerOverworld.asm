@@ -161,6 +161,8 @@ playerOverworld_updateMovement_false:
 
 ; -------------------------------------------------------------
 playerOverworld_updateMovementKeyPress:
+  xor rax, rax
+  
   cmp byte [rel inputMap + KEY_UP], 1
   jnz playerOverworld_updateMovementKeyPress_noUp
   mov byte [rel playerSM], PLAYER_SM_WALK
@@ -170,6 +172,7 @@ playerOverworld_updateMovementKeyPress:
   sub eax, 16 << 16
   mov dword [rel playerTY], eax
   mov byte [rel playerFace], PLAYER_FACE_UP
+  mov rax, 1
   jmp playerOverworld_updateMovementKeyPress_return
 
 playerOverworld_updateMovementKeyPress_noUp:
@@ -182,6 +185,7 @@ playerOverworld_updateMovementKeyPress_noUp:
   mov eax, [rel playerY]
   mov dword [rel playerTY], eax
   mov byte [rel playerFace], PLAYER_FACE_LEFT
+  mov rax, 1
   jmp playerOverworld_updateMovementKeyPress_return
 
 playerOverworld_updateMovementKeyPress_noLeft:
@@ -194,6 +198,7 @@ playerOverworld_updateMovementKeyPress_noLeft:
   add eax, 16 << 16
   mov dword [rel playerTY], eax
   mov byte [rel playerFace], PLAYER_FACE_DOWN
+  mov rax, 1
   jmp playerOverworld_updateMovementKeyPress_return
 
 playerOverworld_updateMovementKeyPress_noDown:
@@ -206,6 +211,7 @@ playerOverworld_updateMovementKeyPress_noDown:
   mov eax, [rel playerY]
   mov dword [rel playerTY], eax
   mov byte [rel playerFace], PLAYER_FACE_RIGHT
+  mov rax, 1
   jmp playerOverworld_updateMovementKeyPress_return
 
 playerOverworld_updateMovementKeyPress_return:

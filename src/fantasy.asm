@@ -156,10 +156,10 @@ _start:
   jz _start_glfw_window_error
   mov [rel window], rax
 
-  mov edi, [rel window]
+  mov rdi, [rel window]
   call glfwMaximizeWindow
 
-  mov edi, [rel window]
+  mov rdi, [rel window]
   call glfwMakeContextCurrent
 
   mov edi, 1
@@ -407,7 +407,7 @@ shaderCreateProgram:
   mov edi, [rel shaderProgram]
   lea rsi, [rel uTextureUniform]
   call glGetUniformLocation
-  mov [textureUniformLocation], rax
+  mov [textureUniformLocation], eax
 
   mov eax, [rel shaderProgram]
   add rsp, 8
