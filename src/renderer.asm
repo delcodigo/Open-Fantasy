@@ -7,6 +7,10 @@ extern texture
 extern warrior_ow_fd_tl
 extern warrior_ow_pal_1
 extern grass_tile_1
+extern grass_tile
+extern palette_indices
+extern grass_pal
+extern rendererDrawMap
 
 global frameBuffer
 global rendererUpdateFrameBuffer
@@ -336,6 +340,59 @@ rendererDrawTile_loop:
   pop r14
   pop r13
   pop r12
+  ret
+
+; rdi: pointer to map
+rendererDrawMap:
+  push rbp
+  mov rbp, rsp
+  sub rsp, 32
+
+  lea rsi, [rdi + 2]
+  mov qword [rbp-8], rsi  ; tilemap
+  mov al, byte [rdi]
+  mov byte [rbp-9], al    ; width
+  mov al, byte [rdi + 1]
+  mov byte [rbp-10], al   ; height
+  mov byte [rbp-11], 0    ; x
+  mov byte [rbp-12], 0    ; y
+
+rendererDrawMap_verticalLoop:
+  mov byte[rbp-11], 0
+
+rendererDrawMap_horizontalLoop:
+  mov rsi, qword [rbp-8]
+  movzx eax, byte [rsi]
+  lea rcx, [rel palette_indices]
+  movzx r8d, byte [rcx + rax]
+  shl r8, 4
+  lea rcx, [rel grass_pal]
+  add rcx, r8
+
+  shl rax, 2
+  lea rdx, [rel grass_tile]
+  add rdx, rax
+
+  movzx edi, byte [rbp-11]
+  shl rdi, 4
+  movzx esi, byte [rbp-12]
+  shl rsi, 4
+  call rendererDrawTile
+
+  inc qword [rbp-8]
+
+  inc byte [rbp-11]
+  mov al, byte[rbp-11]
+  cmp al, byte[rbp-9]
+  jb rendererDrawMap_horizontalLoop
+
+  inc byte [rbp-12]
+  mov al, byte [rbp-12]
+  cmp al, byte [rbp-10]
+  jb rendererDrawMap_verticalLoop
+
+  mov rsp, rbp
+  pop rbp
   ret
 
   section .note.GNU-stack noalloc noexec nowrite progbits

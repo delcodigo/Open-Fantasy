@@ -48,21 +48,19 @@ extern rendererDrawSquare
 extern rendererDrawSprite
 extern rendererDrawMacroSprite
 extern rendererFrameBufferResizeCallback
-extern rendererDrawTile
+extern rendererDrawMap
 
 extern warrior_ow_fd
 extern warrior_ow_pal
 
-extern grass_pal
-extern stonepavedRoad_pal
-extern grass_tile
-extern stonepavedRoad_tile
 
 extern inputKeyCallback
 
 extern playerOverworld_init
 extern playerOverworld_update
 extern playerOverworld_render
+
+extern townTest
 
 global texture
 
@@ -205,60 +203,6 @@ _start_window_loop:
 
   call rendererClearFrameBuffer
 
-  mov rdi, 0
-  mov rsi, 0
-  lea rdx, [rel grass_tile]
-  lea rcx, [rel grass_pal]
-  call rendererDrawTile
-
-  mov rdi, 16
-  mov rsi, 0
-  lea rdx, [rel grass_tile]
-  lea rcx, [rel grass_pal]
-  call rendererDrawTile
-
-  mov rdi, 32
-  mov rsi, 0
-  lea rdx, [rel grass_tile]
-  lea rcx, [rel grass_pal]
-  call rendererDrawTile
-
-  mov rdi, 0
-  mov rsi, 16
-  lea rdx, [rel grass_tile]
-  lea rcx, [rel grass_pal]
-  call rendererDrawTile
-
-  mov rdi, 16
-  mov rsi, 16
-  lea rdx, [rel grass_tile]
-  lea rcx, [rel grass_pal]
-  call rendererDrawTile
-
-  mov rdi, 32
-  mov rsi, 16
-  lea rdx, [rel grass_tile]
-  lea rcx, [rel grass_pal]
-  call rendererDrawTile
-
-  mov rdi, 0
-  mov rsi, 32
-  lea rdx, [rel grass_tile]
-  lea rcx, [rel grass_pal]
-  call rendererDrawTile
-
-  mov rdi, 16
-  mov rsi, 32
-  lea rdx, [rel grass_tile]
-  lea rcx, [rel grass_pal]
-  call rendererDrawTile
-
-  mov rdi, 32
-  mov rsi, 32
-  lea rdx, [rel grass_tile]
-  lea rcx, [rel grass_pal]
-  call rendererDrawTile
-
   call glfwGetTime
   movsd xmm1, xmm0
   subsd xmm1, [rel timePrevious]
@@ -279,6 +223,9 @@ _start_window_loop_can_update:
   jmp _start_window_loop_can_update
 
 _start_window_loop_no_update_yet:
+  lea rdi, [rel townTest]
+  call rendererDrawMap
+
   call playerOverworld_render
 
   call rendererUpdateFrameBuffer
