@@ -93,7 +93,7 @@ rendererClearFrameBuffer:
 ;
 ; -------------------------------------------------------------
 rendererUpdateFrameBuffer:
-  sub rsp, 8
+  sub rsp, 40
 
   mov edi, 0xDE1
   mov esi, [rel texture]
@@ -106,8 +106,6 @@ rendererUpdateFrameBuffer:
   mov r8d, 256
   mov r9d, 240
 
-  sub rsp, 32
-
   mov qword [rsp], 0x1908
   mov qword [rsp + 8], 0x1401
 
@@ -116,9 +114,7 @@ rendererUpdateFrameBuffer:
 
   call glTexSubImage2D
 
-  add rsp, 32
-
-  add rsp, 8
+  add rsp, 40
   ret
 
 ; -------------------------------------------------------------
@@ -290,6 +286,7 @@ rendererDrawTile:
   push r13
   push r14
   push r15
+  sub rsp, 8
   
   xor r15, r15
   xor r13, r13
@@ -319,6 +316,7 @@ rendererDrawTile_loop:
   cmp r15, 4
   jl rendererDrawTile_loop
 
+  add rsp, 8
   pop r15
   pop r14
   pop r13
@@ -329,25 +327,22 @@ rendererDrawTile_loop:
 ; rdi: pointer to map
 ; -------------------------------------------------------------
 rendererDrawMap:
-  push rbp
-  mov rbp, rsp
-  sub rsp, 32
+  push r12
+  push r13
+  push r14
+  push r15
+  sub rsp, 8
 
-  lea rsi, [rdi + 2]
-  mov qword [rbp-8], rsi  ; tilemap
-  mov al, byte [rdi]
-  mov byte [rbp-9], al    ; width
-  mov al, byte [rdi + 1]
-  mov byte [rbp-10], al   ; height
-  mov byte [rbp-11], 0    ; x
-  mov byte [rbp-12], 0    ; y
+  lea r12, [rdi + 2]      ; tilemap
+  movzx r15d, word [rdi]  ; width and height
+  xor r13, r13            ; x
+  xor r14, r14            ; y
 
 rendererDrawMap_verticalLoop:
-  mov byte[rbp-11], 0
+  xor r13, r13
 
 rendererDrawMap_horizontalLoop:
-  mov rsi, qword [rbp-8]
-  movzx eax, byte [rsi]
+  movzx eax, byte [r12]
   lea rcx, [rel palette_indices]
   movzx r8d, byte [rcx + rax]
   shl r8, 4
@@ -358,26 +353,29 @@ rendererDrawMap_horizontalLoop:
   lea rdx, [rel grass_tile]
   add rdx, rax
 
-  movzx edi, byte [rbp-11]
+  mov edi, r13d
   shl rdi, 4
-  movzx esi, byte [rbp-12]
+  mov esi, r14d
   shl rsi, 4
   call rendererDrawTile
 
-  inc qword [rbp-8]
+  inc r12
 
-  inc byte [rbp-11]
-  mov al, byte[rbp-11]
-  cmp al, byte[rbp-9]
+  inc r13d
+  cmp r13b, r15b
   jb rendererDrawMap_horizontalLoop
 
-  inc byte [rbp-12]
-  mov al, byte [rbp-12]
-  cmp al, byte [rbp-10]
+  inc r14d
+  mov r9, r15
+  shr r9, 8
+  cmp r14b, r9b
   jb rendererDrawMap_verticalLoop
 
-  mov rsp, rbp
-  pop rbp
+  add rsp, 8
+  pop r15
+  pop r14
+  pop r13
+  pop r12
   ret
 
   section .note.GNU-stack noalloc noexec nowrite progbits

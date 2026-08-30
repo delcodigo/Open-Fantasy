@@ -49,6 +49,8 @@ playerOverworld_init:
 
 ; -------------------------------------------------------------
 playerOverworld_update:
+  sub rsp, 8
+
   cmp byte [rel playerSM], PLAYER_SM_IDLE
   jz playerOverworld_update_idle
   cmp byte [rel playerSM], PLAYER_SM_WALK
@@ -66,12 +68,15 @@ playerOverworld_update_walk:
 
 playerOverworld_update_return:
   call playerOverworld_updateCamera
+  add rsp, 8
   ret
 
 ; -------------------------------------------------------------
 ; rdi: isPositiveMovement
 ; -------------------------------------------------------------
 playerOverworld_updateMovementCheckFinish:
+  sub rsp, 8
+
   test rdi, rdi
   jnz playerOverworld_updateMovementCheckFinish_positive
   
@@ -100,16 +105,19 @@ playerOverworld_updateMovementCheckFinish_true:
   mov eax, [rel playerTY]
   mov dword [rel playerY], eax
   mov byte [rel playerSM], PLAYER_SM_IDLE
-  mov eax, 1
   
   lea rdi, [rel playerFI]
   call spriteAnimationRoundFrame
 
   call playerOverworld_updateMovementKeyPress
+
+  mov eax, 1
+  add rsp, 8
   ret
 
 playerOverworld_updateMovementCheckFinish_false:
   xor eax, eax
+  add rsp, 8
   ret
 
 ; -------------------------------------------------------------
@@ -122,15 +130,13 @@ playerOverworld_updateMovement:
   sub dword [rel playerX], MOVEMENT_SPEED
 
   xor rdi, rdi
-  call playerOverworld_updateMovementCheckFinish
-  ret
+  jmp playerOverworld_updateMovementCheckFinish
 
 playerOverworld_updateMovement_moveRight:
   add dword [rel playerX], MOVEMENT_SPEED
 
   mov rdi, 1
-  call playerOverworld_updateMovementCheckFinish
-  ret
+  jmp playerOverworld_updateMovementCheckFinish
 
 playerOverworld_updateMovement_verticalCheck:
   mov eax, [rel playerY]
@@ -141,15 +147,13 @@ playerOverworld_updateMovement_verticalCheck:
   sub dword [rel playerY], MOVEMENT_SPEED
 
   xor rdi, rdi
-  call playerOverworld_updateMovementCheckFinish
-  ret
+  jmp playerOverworld_updateMovementCheckFinish
 
 playerOverworld_updateMovement_moveDown:
   add dword [rel playerY], MOVEMENT_SPEED
 
   mov rdi, 1
-  call playerOverworld_updateMovementCheckFinish
-  ret
+  jmp playerOverworld_updateMovementCheckFinish
 
 playerOverworld_updateMovement_false:
   xor eax, eax
@@ -280,8 +284,7 @@ playerOverworld_updateAnimationFrame:
   cmp byte [rel playerSM], PLAYER_SM_IDLE
   jz playerOverworld_updateAnimationFrame_idle
   lea rdi, [rel playerFI]
-  call spriteAnimationUpdate
-  ret
+  jmp spriteAnimationUpdate
 
 playerOverworld_updateAnimationFrame_idle:
   xor rax, rax
@@ -289,6 +292,8 @@ playerOverworld_updateAnimationFrame_idle:
 
 ; -------------------------------------------------------------
 playerOverworld_render:
+  sub rsp, 8
+
   call playerOverworld_updateAnimationFrame
   mov r8, rax
 
@@ -306,6 +311,7 @@ playerOverworld_render:
   lea rcx, [rel warrior_ow_pal]
   call rendererDrawMacroSprite
 
+  add rsp, 8
   ret
 
 section .note.GNU-stack noalloc noexec nowrite progbits
