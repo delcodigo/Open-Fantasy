@@ -14,18 +14,20 @@ extern rendererDrawMap
 
 global frameBuffer
 global rendererUpdateFrameBuffer
-global rendererDrawSquare
 global rendererDrawSprite
 global rendererDrawMacroSprite
 global rendererClearFrameBuffer
 global rendererFrameBufferResizeCallback
 global rendererDrawTile
+global cameraX
+global cameraY
 
 section .bss
   frameBuffer resb 245760
 
 section .data
-  pixelX dq 0
+  cameraX dd 0
+  cameraY dd 0
 
 section .text
 
@@ -120,39 +122,6 @@ rendererUpdateFrameBuffer:
   ret
 
 ; -------------------------------------------------------------
-; rendererDrawSquare(rdi: x, rsi: y, rdx: w, rcx: h)
-;
-; Draws a red square of width rdx and height rcx at rdi,rsi
-;
-; -------------------------------------------------------------
-rendererDrawSquare:
-  push r12
-
-  xor r8, r8
-rendererDrawSquare_horizontalLoop:
-  xor r9, r9
-rendererDrawSquare_verticalLoop:
-  mov r12, r9
-  add r12, rsi
-  imul r12, 256
-  add r12, r8
-  add r12, rdi
-  shl r12, 2
-  lea rax, [rel frameBuffer]
-  mov byte [rax + r12], 255
-
-  inc r9
-  cmp r9, rcx
-  jl rendererDrawSquare_verticalLoop
-
-  inc r8
-  cmp r8, rdx
-  jl rendererDrawSquare_horizontalLoop
-
-  pop r12
-  ret
-
-; -------------------------------------------------------------
 ; rendererDrawSprite(edi: x, esi: y, rdx: sprite, rcx: palette)
 ;
 ; Draws an 8x8 sprite using 2bpp indexed sprites and a palette
@@ -162,6 +131,7 @@ rendererDrawSprite:
   push r12
   push r13
   push r14
+  push r15
 
   movsxd rdi, edi
   movsxd rsi, esi
@@ -176,12 +146,12 @@ rendererDrawSprite_horizontalLoop:
   mov r10, r14
   shl r10, 1
   add r10, r8
-  movzx r11d, byte [rdx + r10]
+  movzx r15d, byte [rdx + r10]
 
   xor r9, r9
 
 rendererDrawSprite_line:
-  mov eax, r11d
+  mov eax, r15d
   shr eax, 6
   and eax, 0b11
 
@@ -194,6 +164,9 @@ rendererDrawSprite_line:
   shl r10, 2
   add r10, rdi
   add r10, r9
+  movsxd r11, [rel cameraX]
+  sar r11, 16
+  sub r10, r11
   
   cmp r10, 0
   jl rendererDrawSprite_skipRender
@@ -202,6 +175,9 @@ rendererDrawSprite_line:
 
   mov r10, rsi
   add r10, r14
+  movsxd r11, [rel cameraY]
+  sar r11, 16
+  sub r10, r11
 
   cmp r10, 0
   jl rendererDrawSprite_skipRender
@@ -211,18 +187,24 @@ rendererDrawSprite_line:
   mov r10, r8
   shl r10, 2
 
+  movsxd r11, [rel cameraY]
+  sar r11, 16
   mov r12, rsi
   add r12, r14
+  sub r12, r11
   imul r12, 256
   add r12, rdi
   add r12, r10
   add r12, r9
+  movsxd r11, [rel cameraX]
+  sar r11, 16
+  sub r12, r11
   shl r12, 2
 
   mov dword [r13 + r12], eax
 
 rendererDrawSprite_skipRender:
-  shl r11d, 2
+  shl r15d, 2
 
   inc r9
   cmp r9, 4
@@ -236,6 +218,7 @@ rendererDrawSprite_skipRender:
   cmp r14, 8
   jl rendererDrawSprite_verticalLoop
 
+  pop r15
   pop r14
   pop r13
   pop r12
@@ -342,7 +325,9 @@ rendererDrawTile_loop:
   pop r12
   ret
 
+; -------------------------------------------------------------
 ; rdi: pointer to map
+; -------------------------------------------------------------
 rendererDrawMap:
   push rbp
   mov rbp, rsp

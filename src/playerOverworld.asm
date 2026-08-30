@@ -11,6 +11,8 @@
 %define MOVEMENT_SPEED 0x11111
 
 extern rendererDrawMacroSprite
+extern cameraX
+extern cameraY
 
 extern warrior_ow_fd_1
 extern warrior_ow_fd
@@ -20,6 +22,8 @@ extern warrior_ow_fu
 extern warrior_ow_pal
 
 extern inputMap
+
+extern townTest
 
 extern spriteAnimationRoundFrame
 extern spriteAnimationUpdate
@@ -61,6 +65,7 @@ playerOverworld_update_walk:
   jnz playerOverworld_update_return
 
 playerOverworld_update_return:
+  call playerOverworld_updateCamera
   ret
 
 ; -------------------------------------------------------------
@@ -200,6 +205,51 @@ playerOverworld_updateMovementKeyPress_noDown:
   jmp playerOverworld_updateMovementKeyPress_return
 
 playerOverworld_updateMovementKeyPress_return:
+  ret
+
+; -------------------------------------------------------------
+playerOverworld_updateCamera:
+  lea r8, [rel townTest]
+  movzx r9d, byte [r8 + 1]
+  shl r9d, 4
+  sub r9d, 240
+  shl r9d, 16
+
+  movzx r8d, byte [r8]
+  shl r8d, 4
+  sub r8d, 256
+  shl r8d, 16
+
+  mov eax, [rel playerX]
+  sub eax, 120 << 16
+  cmp eax, 0
+  jge playerOverworld_updateCamera_compareMaxX
+  xor eax, eax
+  jmp playerOverworld_updateCamera_setX
+
+playerOverworld_updateCamera_compareMaxX:
+  cmp eax, r8d
+  jle playerOverworld_updateCamera_setX
+  mov eax, r8d
+
+playerOverworld_updateCamera_setX:
+  sub eax, 256
+  mov [rel cameraX], eax
+
+  mov eax, [rel playerY]
+  sub eax, 112 << 16
+  cmp eax, 0
+  jge playerOverworld_updateCamera_compareMaxY
+  xor eax, eax
+  jmp playerOverworld_updateCamera_setY
+
+playerOverworld_updateCamera_compareMaxY:
+  cmp eax, r9d
+  jle playerOverworld_updateCamera_setY
+  mov eax, r9d
+
+playerOverworld_updateCamera_setY:
+  mov [rel cameraY], eax
   ret
 
 ; -------------------------------------------------------------
