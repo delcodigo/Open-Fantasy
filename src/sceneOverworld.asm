@@ -22,6 +22,8 @@ section .text
 
 ; -------------------------------------------------------------
 sceneOverworldInit:
+  sub rsp, 8
+
   lea rax, [rel town_test]
   mov qword [rel currentMap], rax
 
@@ -32,20 +34,26 @@ sceneOverworldInit:
   mov [rel sceneRender], rax
 
   call playerOverworldInit
+
+  add rsp, 8
   ret
 
 ; -------------------------------------------------------------
 sceneOverworldUpdate:
+  sub rsp, 8
   call playerOverworldUpdate
   call rendererUpdateAnimationFrameIndex
+  add rsp, 8
   ret
 
 ; -------------------------------------------------------------
 sceneOverworldRender:
+  sub rsp, 8
   mov rdi, [rel currentMap]
   call rendererDrawMap
 
   call playerOverworldRender
+  add rsp, 8
   ret
 
 section .note.GNU-stack noalloc noexec nowrite progbits
