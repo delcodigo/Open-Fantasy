@@ -1,7 +1,7 @@
-global townTest
+global town_test
 
 section .rodata
-  townTest: 
+  town_test: 
     db 20, 23
     db 0,0,0,0,0,0,0,4,4,4,4,4,2,0,0,0,0,0,0,0,
     db 0,4,0,0,0,0,4,4,4,4,4,4,2,4,4,0,0,0,0,0,

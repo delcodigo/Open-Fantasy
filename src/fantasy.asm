@@ -1,3 +1,7 @@
+extern strLen
+extern sysPrint
+extern sysExit
+
 extern glfwInit
 extern glfwTerminate
 extern glfwWindowHint
@@ -54,19 +58,18 @@ extern rendererUpdateAnimationFrameIndex
 extern warrior_ow_fd
 extern warrior_ow_pal
 
-
 extern inputKeyCallback
 
-extern playerOverworld_init
-extern playerOverworld_update
-extern playerOverworld_render
+extern playerOverworldInit
+extern playerOverworldUpdate
+extern playerOverworldRender
 
-extern townTest
+extern town_test
 
 global texture
 
 section .rodata
-  gameExitSuccesfully db "The fantasy is over.", 10, 0
+  gameExitSuccessfully db "The fantasy is over.", 10, 0
   glfwInitErrorMessage db "Failed to initialize GLFW", 10, 0
   glfwInitWindowErrorMessage db "Failed to create window", 10, 0
   shaderCompileFailedMsg db "Failed to compile the shader", 10, 0
@@ -120,7 +123,7 @@ section .data
   timeAccumulator dq 0
 
 section .bss
-  shaderCompileSucess resd 1
+  shaderCompileSuccess resd 1
   screenVAO resd 1
   screenVBO resd 2
   texture resd 1
@@ -130,9 +133,6 @@ section .note.GNU-stack noalloc noexec nowrite progbits
 
 section .text
   global _start
-
-%define SYSCALL_WRITE 1
-%define SYSCALL_EXIT 60
 
 _start:
   call glfwInit
@@ -196,7 +196,7 @@ _start:
   movsd [rel timePrevious], xmm0
   mov qword [rel timeAccumulator], 0
 
-  call playerOverworld_init
+  call playerOverworldInit
 
 _start_window_loop:
   mov rdi, 0x4100
@@ -216,7 +216,7 @@ _start_window_loop_can_update:
   comisd xmm0, [rel fixedDeltaTime]
   jb _start_window_loop_no_update_yet
 
-  call playerOverworld_update
+  call playerOverworldUpdate
   call rendererUpdateAnimationFrameIndex
 
   movsd xmm0, [rel timeAccumulator]
@@ -225,10 +225,10 @@ _start_window_loop_can_update:
   jmp _start_window_loop_can_update
 
 _start_window_loop_no_update_yet:
-  lea rdi, [rel townTest]
+  lea rdi, [rel town_test]
   call rendererDrawMap
 
-  call playerOverworld_render
+  call playerOverworldRender
 
   call rendererUpdateFrameBuffer
   call screenRender
@@ -246,20 +246,20 @@ _start_window_loop_no_update_yet:
   call glfwDestroyWindow
   call glfwTerminate
 
-  lea rdi, [rel gameExitSuccesfully]
-  call sys_print
-  call sys_exit
+  lea rdi, [rel gameExitSuccessfully]
+  call sysPrint
+  call sysExit
 
 _start_glfw_error:
   lea rdi, [rel glfwInitErrorMessage]
-  call sys_print
-  call sys_exit
+  call sysPrint
+  call sysExit
 
 _start_glfw_window_error:
   call glfwTerminate
   lea rdi, [rel glfwInitWindowErrorMessage]
-  call sys_print
-  call sys_exit
+  call sysPrint
+  call sysExit
 
 ; -------------------------------------------------------------
 ; screenRender()
@@ -327,11 +327,11 @@ shaderCompile:
 
   mov edi, r12d
   mov esi, 0x8B81
-  lea rdx, [rel shaderCompileSucess]  
+  lea rdx, [rel shaderCompileSuccess]  
   call glGetShaderiv
-  mov eax, [rel shaderCompileSucess]
+  mov eax, [rel shaderCompileSuccess]
   test eax, eax
-  jz shaderCompileFailed
+  jz shaderCompile_failed
 
   mov eax, r12d
 
@@ -340,13 +340,13 @@ shaderCompile:
   pop r12
   ret
 
-shaderCompileFailed:
+shaderCompile_failed:
   lea rdi, [rel shaderCompileFailedMsg]
-  call sys_print
+  call sysPrint
   mov rdi, [rel window]
   call glfwDestroyWindow
   call glfwTerminate
-  call sys_exit
+  call sysExit
 
 ; -------------------------------------------------------------
 ; shaderCreateProgram()
@@ -394,11 +394,11 @@ shaderCreateProgram:
 
   mov edi, [rel shaderProgram]
   mov esi, 0x8B82
-  lea rdx, [rel shaderCompileSucess]  
+  lea rdx, [rel shaderCompileSuccess]  
   call glGetProgramiv
-  mov eax, [rel shaderCompileSucess]
+  mov eax, [rel shaderCompileSuccess]
   test eax, eax
-  jz shaderCreateProgramError
+  jz shaderCreateProgram_error
 
   mov edi, r12d
   call glDeleteShader
@@ -417,13 +417,13 @@ shaderCreateProgram:
   pop r12
   ret
 
-shaderCreateProgramError:
+shaderCreateProgram_error:
   lea rdi, [rel shaderLinkFailedMsg]
-  call sys_print
+  call sysPrint
   mov rdi, [rel window]
   call glfwDestroyWindow
   call glfwTerminate
-  call sys_exit
+  call sysExit
 
 ; -------------------------------------------------------------
 ; geometryCreateScreen()
@@ -546,60 +546,3 @@ textureCreateScreen:
 
   add rsp, 8
   ret
-
-; -------------------------------------------------------------
-; str_len(rdi_str_pointer: string)
-;
-; Walks through a NULL terminated string counting the number of 
-; characters and returns the count. It doesn't includes the NULL
-; terminator as part of the count
-;
-; assumes input is a NULL terminated string
-;
-; rdi: pointer to string
-;
-; returns:
-;	rax = rcx pointer - rdi pointer
-;
-; registers:
-;	rcx = local pointer to string
-; -------------------------------------------------------------
-str_len:
-	mov rcx, rdi
-
-str_len_loop:
-  cmp byte [rcx], 0
-  jz str_len_return
-  inc rcx
-  jmp str_len_loop
-
-str_len_return:
-  mov rax, rcx
-  sub rax, rdi
-  ret
-
-; -------------------------------------------------------------
-; sys_print(rdi: string)
-;
-; Prints a string to the console
-;
-; rdi: message to print
-; -------------------------------------------------------------
-sys_print:
-	call str_len
-
-	mov rsi, rdi
-	mov rdx, rax
-	mov rax, SYSCALL_WRITE
-	mov rdi, 1
-	syscall	
-	ret
-
-; -------------------------------------------------------------
-; Terminates the program with status 0
-; -------------------------------------------------------------
-sys_exit:
-	mov rax, SYSCALL_EXIT
-  mov rdi, 0
-	syscall
-	ret

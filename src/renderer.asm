@@ -54,15 +54,15 @@ rendererFrameBufferResizeCallback:
 
   mov ecx, r8d
   cmp ecx, r9d
-  jl rendererFrameBufferResizeCallback_xlessy
+  jl rendererFrameBufferResizeCallback_xLessY
   mov ecx, r9d
 
-rendererFrameBufferResizeCallback_xlessy:
+rendererFrameBufferResizeCallback_xLessY:
   cmp ecx, 1
-  jge rendererFrameBufferResizeCallback_scale1orMore
+  jge rendererFrameBufferResizeCallback_scale1OrMore
   mov ecx, 1
 
-rendererFrameBufferResizeCallback_scale1orMore:
+rendererFrameBufferResizeCallback_scale1OrMore:
   mov r8d, ecx
   shl r8d, 8
 
@@ -399,13 +399,13 @@ rendererDrawMap_horizontalLoop:
 
   cmp rax, 0
   movzx eax, byte [r12]
-  jl rendererDrawMap_NoAnimatedFrame
+  jl rendererDrawMap_noAnimatedFrame
 
   mov ecx, [rel worldFI]
   shr rcx, 16
   add rax, rcx
 
-rendererDrawMap_NoAnimatedFrame:
+rendererDrawMap_noAnimatedFrame:
   
   lea rcx, [rel palette_indices]
   movzx r8d, byte [rcx + rax]
