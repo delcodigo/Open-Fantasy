@@ -162,7 +162,7 @@ playerOverworld_updateMovement_false:
 ; -------------------------------------------------------------
 playerOverworld_updateMovementKeyPress:
   xor rax, rax
-  
+
   cmp byte [rel inputMap + KEY_UP], 1
   jnz playerOverworld_updateMovementKeyPress_noUp
   mov byte [rel playerSM], PLAYER_SM_WALK
@@ -243,7 +243,6 @@ playerOverworld_updateCamera_compareMaxX:
   mov eax, r8d
 
 playerOverworld_updateCamera_setX:
-  sub eax, 256
   mov [rel cameraX], eax
 
   mov eax, [rel playerY]

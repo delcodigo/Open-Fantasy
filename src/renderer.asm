@@ -333,13 +333,46 @@ rendererDrawMap:
   push r15
   sub rsp, 8
 
-  lea r12, [rdi + 2]      ; tilemap
-  movzx r15d, word [rdi]  ; width and height
-  xor r13, r13            ; x
-  xor r14, r14            ; y
+  mov eax, [rel cameraY]
+  shr rax, 20
+  movzx r8d, byte [rdi]
+  imul rax, r8
+  mov r8d, [rel cameraX]
+  shr r8, 20
+  add rax, r8
+
+  lea r12, [rdi + rax + 2]
+  mov r14d, [rel cameraY]
+  shr r14, 20
+
+  mov eax, [rel cameraX]
+  shr eax, 20
+  add eax, 17
+  movzx r8d, byte [rdi]
+  cmp r8d, eax
+  cmovb eax, r8d
+  mov r15d, eax
+
+  mov eax, [rel cameraY]
+  shr eax, 20
+  add eax, 16
+  movzx r8d, byte [rdi + 1]
+  cmp r8d, eax
+  cmovb eax, r8d
+  shl eax, 8
+  add r15d, eax
+
+  movzx eax, byte [rdi]
+  sub al, r15b
+  mov r8d, [rel cameraX]
+  shr r8, 20
+  add rax, r8
+  shl rax, 16
+  add r15, rax
 
 rendererDrawMap_verticalLoop:
-  xor r13, r13
+  mov r13d, [rel cameraX]
+  shr r13, 20
 
 rendererDrawMap_horizontalLoop:
   movzx eax, byte [r12]
@@ -364,6 +397,10 @@ rendererDrawMap_horizontalLoop:
   inc r13d
   cmp r13b, r15b
   jb rendererDrawMap_horizontalLoop
+
+  mov rax, r15
+  shr rax, 16
+  add r12, rax
 
   inc r14d
   mov r9, r15
