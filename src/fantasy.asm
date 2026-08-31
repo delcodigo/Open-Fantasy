@@ -60,13 +60,13 @@ extern warrior_ow_pal
 
 extern inputKeyCallback
 
-extern playerOverworldInit
-extern playerOverworldUpdate
-extern playerOverworldRender
-
-extern town_test
+extern sceneOverworldInit
+extern sceneOverworldUpdate
+extern sceneOverworldRender
 
 global texture
+global sceneUpdate
+global sceneRender
 
 section .rodata
   gameExitSuccessfully db "The fantasy is over.", 10, 0
@@ -128,6 +128,8 @@ section .bss
   screenVBO resd 2
   texture resd 1
   textureUniformLocation resd 1
+  sceneUpdate resq 1
+  sceneRender resq 1
 
 section .note.GNU-stack noalloc noexec nowrite progbits
 
@@ -196,7 +198,7 @@ _start:
   movsd [rel timePrevious], xmm0
   mov qword [rel timeAccumulator], 0
 
-  call playerOverworldInit
+  call sceneOverworldInit
 
 _start_window_loop:
   mov rdi, 0x4100
@@ -216,8 +218,7 @@ _start_window_loop_can_update:
   comisd xmm0, [rel fixedDeltaTime]
   jb _start_window_loop_no_update_yet
 
-  call playerOverworldUpdate
-  call rendererUpdateAnimationFrameIndex
+  call [rel sceneUpdate]
 
   movsd xmm0, [rel timeAccumulator]
   subsd xmm0, [rel fixedDeltaTime]
@@ -225,10 +226,7 @@ _start_window_loop_can_update:
   jmp _start_window_loop_can_update
 
 _start_window_loop_no_update_yet:
-  lea rdi, [rel town_test]
-  call rendererDrawMap
-
-  call playerOverworldRender
+  call [rel sceneRender]
 
   call rendererUpdateFrameBuffer
   call screenRender

@@ -21,7 +21,7 @@ extern warrior_ow_pal
 
 extern inputMap
 
-extern town_test
+extern currentMap
 
 extern spriteAnimationRoundFrame
 extern spriteAnimationUpdate
@@ -237,7 +237,7 @@ playerOverworldUpdateMovementKeyPress_noDown:
   call playerOverworldUpdateMovementKeyPressCheckCollision
   cmp rax, 1
   jz playerOverworldUpdateMovementKeyPress_return
-  
+
   mov byte [rel playerSM], PLAYER_SM_WALK
   jmp playerOverworldUpdateMovementKeyPress_return
 
@@ -247,7 +247,7 @@ playerOverworldUpdateMovementKeyPress_return:
 
 ; -------------------------------------------------------------
 playerOverworldUpdateCamera:
-  lea r8, [rel town_test]
+  mov r8, [rel currentMap]
   movzx r9d, byte [r8 + 1]
   shl r9d, 4
   sub r9d, 240
