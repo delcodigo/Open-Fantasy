@@ -2,6 +2,8 @@
 
 A JRPG written in raw x86_64 assembly for Linux.
 
+![screenshot](docs/screenshot.png)
+
 ## Why
 
 I've been playing the original *Final Fantasy* on NES, which, like most
@@ -19,8 +21,8 @@ engine, no scripting layer, just syscalls, registers, and stack frames.
   - [GLFW](https://www.glfw.org/) — window/context/input handling
   - [miniaudio](https://miniaudio.dev/) — audio playback (planned, not wired
     up yet)
-- Everything else (sprite rendering, game state, entities, whatever a JRPG
-  needs) is hand-rolled assembly.
+- Everything else (sprite rendering, tile/map rendering, animation, input,
+  entities, whatever a JRPG needs) is hand-rolled assembly.
 
 ## Platform
 
@@ -41,9 +43,17 @@ make clean  # remove build/ and bin/
 ## Layout
 
 ```
-src/                  game source (assembly)
-  fantasy.asm           entry point and main loop
-  constants.inc         shared constants (key codes, etc.)
-build/                object files (gitignored)
-bin/                  final binary (gitignored)
+src/                     game source (assembly)
+  fantasy.asm              entry point, GL/GLFW setup, and main loop
+  constants.inc             shared constants (key codes, speeds, etc.)
+  input.asm                 keyboard input handling
+  playerOverworld.asm       player state machine and overworld movement
+  renderer.asm               framebuffer/texture rendering
+  spriteAnimation.asm       fixed-point sprite animation frame stepping
+  sprites.asm                packed 2bpp character sprites and palettes
+  tileset.asm                 packed 2bpp tile sprites and palettes
+  maps.asm                    map/tilemap data
+  utils.asm                   string, syscall, and misc helpers
+build/                   object files (gitignored)
+bin/                     final binary (gitignored)
 ```
