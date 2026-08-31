@@ -1,4 +1,9 @@
 global town_test
+global mapIsTileSolid
+
+extern solid_tiles
+
+extern indexOfByte
 
 section .rodata
   town_test: 
@@ -27,4 +32,37 @@ section .rodata
     db 6,7,4,4,0,5,6,6,7,0,1,0,5,6,6,7,0,4,0,4,
     db 0,4,4,4,0,4,4,0,0,0,1,0,0,0,0,0,0,4,4,4
   
+section .text
+
+; rdi: x, rsi: y
+mapIsTileSolid:
+  shr rdi, 20
+  shr rsi, 20
+
+  lea rax, [rel town_test]
+  movzx edx, byte [rax]
+  imul esi, edx
+  add rsi, rdi
+  add rsi, 2
+
+  movzx rdx, byte [rax + rsi]
+
+  lea rdi, [rel solid_tiles]
+  movzx esi, byte [rdi]
+  inc rdi
+
+  sub rsp, 8
+  call indexOfByte
+  add rsp, 8
+
+  test rax, rax
+  jl mapIsTileSolid_notSolid
+
+  mov rax, 1
+  ret
+
+mapIsTileSolid_notSolid:
+  xor rax, rax
+  ret
+
 section .note.GNU-stack noalloc noexec nowrite progbits

@@ -7,6 +7,7 @@ global water_tile_1
 global water_pal
 global palette_indices
 global animated_indices
+global solid_tiles
 
 section .rodata
   grass_pal dd 0x00000000, 0xFF10AA49, 0xFF006D38, 0xFF797979 ; [0]
@@ -429,5 +430,9 @@ section .rodata
   animated_indices: 
     db 2
     db 2, 3
+
+  solid_tiles:
+    db 13
+    db 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14
 
 section .note.GNU-stack noalloc noexec nowrite progbits

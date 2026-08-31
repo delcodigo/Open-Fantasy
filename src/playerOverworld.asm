@@ -26,6 +26,8 @@ extern town_test
 extern spriteAnimationRoundFrame
 extern spriteAnimationUpdate
 
+extern mapIsTileSolid
+
 global playerOverworldInit
 global playerOverworldUpdate
 global playerOverworldRender
@@ -56,13 +58,10 @@ playerOverworldUpdate:
 
 playerOverworldUpdate_idle:
   call playerOverworldUpdateMovementKeyPress
-  test rax, rax
-  jnz playerOverworldUpdate_return
+  jmp playerOverworldUpdate_return
 
 playerOverworldUpdate_walk:
   call playerOverworldUpdateMovement
-  test rax, rax
-  jnz playerOverworldUpdate_return
 
 playerOverworldUpdate_return:
   call playerOverworldUpdateCamera
@@ -158,12 +157,21 @@ playerOverworldUpdateMovement_false:
   ret
 
 ; -------------------------------------------------------------
+playerOverworldUpdateMovementKeyPressCheckCollision:
+  sub rsp, 8
+  mov edi, [rel playerTX]
+  mov esi, [rel playerTY]
+  call mapIsTileSolid
+  add rsp, 8
+  ret
+
+; -------------------------------------------------------------
 playerOverworldUpdateMovementKeyPress:
+  sub rsp, 8
   xor rax, rax
 
   cmp byte [rel inputMap + KEY_UP], 1
   jnz playerOverworldUpdateMovementKeyPress_noUp
-  mov byte [rel playerSM], PLAYER_SM_WALK
   mov eax, [rel playerX]
   mov dword [rel playerTX], eax
   mov eax, [rel playerY]
@@ -171,12 +179,17 @@ playerOverworldUpdateMovementKeyPress:
   mov dword [rel playerTY], eax
   mov byte [rel playerDir], PLAYER_DIR_UP
   mov rax, 1
+
+  call playerOverworldUpdateMovementKeyPressCheckCollision
+  cmp rax, 1
+  jz playerOverworldUpdateMovementKeyPress_return
+
+  mov byte [rel playerSM], PLAYER_SM_WALK
   jmp playerOverworldUpdateMovementKeyPress_return
 
 playerOverworldUpdateMovementKeyPress_noUp:
   cmp byte [rel inputMap + KEY_LEFT], 1
   jnz playerOverworldUpdateMovementKeyPress_noLeft
-  mov byte [rel playerSM], PLAYER_SM_WALK
   mov eax, [rel playerX]
   sub eax, 16 << 16
   mov dword [rel playerTX], eax
@@ -184,12 +197,17 @@ playerOverworldUpdateMovementKeyPress_noUp:
   mov dword [rel playerTY], eax
   mov byte [rel playerDir], PLAYER_DIR_LEFT
   mov rax, 1
+
+  call playerOverworldUpdateMovementKeyPressCheckCollision
+  cmp rax, 1
+  jz playerOverworldUpdateMovementKeyPress_return
+
+  mov byte [rel playerSM], PLAYER_SM_WALK
   jmp playerOverworldUpdateMovementKeyPress_return
 
 playerOverworldUpdateMovementKeyPress_noLeft:
   cmp byte [rel inputMap + KEY_DOWN], 1
   jnz playerOverworldUpdateMovementKeyPress_noDown
-  mov byte [rel playerSM], PLAYER_SM_WALK
   mov eax, [rel playerX]
   mov dword [rel playerTX], eax
   mov eax, [rel playerY]
@@ -197,12 +215,17 @@ playerOverworldUpdateMovementKeyPress_noLeft:
   mov dword [rel playerTY], eax
   mov byte [rel playerDir], PLAYER_DIR_DOWN
   mov rax, 1
+
+  call playerOverworldUpdateMovementKeyPressCheckCollision
+  cmp rax, 1
+  jz playerOverworldUpdateMovementKeyPress_return
+
+  mov byte [rel playerSM], PLAYER_SM_WALK
   jmp playerOverworldUpdateMovementKeyPress_return
 
 playerOverworldUpdateMovementKeyPress_noDown:
   cmp byte [rel inputMap + KEY_RIGHT], 1
   jnz playerOverworldUpdateMovementKeyPress_return
-  mov byte [rel playerSM], PLAYER_SM_WALK
   mov eax, [rel playerX]
   add eax, 16 << 16
   mov dword [rel playerTX], eax
@@ -210,9 +233,16 @@ playerOverworldUpdateMovementKeyPress_noDown:
   mov dword [rel playerTY], eax
   mov byte [rel playerDir], PLAYER_DIR_RIGHT
   mov rax, 1
+
+  call playerOverworldUpdateMovementKeyPressCheckCollision
+  cmp rax, 1
+  jz playerOverworldUpdateMovementKeyPress_return
+  
+  mov byte [rel playerSM], PLAYER_SM_WALK
   jmp playerOverworldUpdateMovementKeyPress_return
 
 playerOverworldUpdateMovementKeyPress_return:
+  add rsp, 8
   ret
 
 ; -------------------------------------------------------------
