@@ -31,8 +31,28 @@ support is a maybe-later.
 
 ## Building
 
-Requires `nasm` and `ld`, plus GLFW and OpenGL development libraries
-installed on the system.
+Requires `nasm` and `ld` (from `binutils`), plus GLFW and OpenGL development
+libraries installed on the system.
+
+Debian/Ubuntu/Mint:
+
+```sh
+sudo apt install nasm binutils libglfw3-dev libgl1-mesa-dev
+```
+
+Fedora:
+
+```sh
+sudo dnf install nasm binutils glfw-devel mesa-libGL-devel
+```
+
+Arch:
+
+```sh
+sudo pacman -S nasm binutils glfw mesa
+```
+
+Then:
 
 ```sh
 make        # build bin/fantasy
