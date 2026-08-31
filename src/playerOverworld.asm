@@ -289,6 +289,8 @@ playerOverworld_updateAnimationFrame:
   cmp byte [rel playerSM], PLAYER_SM_IDLE
   jz playerOverworld_updateAnimationFrame_idle
   lea rdi, [rel playerFI]
+  mov rsi, 4
+  mov rdx, CHARACTERS_ANIM_SPEED
   jmp spriteAnimationUpdate
 
 playerOverworld_updateAnimationFrame_idle:

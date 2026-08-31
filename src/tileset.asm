@@ -6,6 +6,7 @@ global cobblestone_tile
 global water_tile_1
 global water_pal
 global palette_indices
+global animated_indices
 
 section .rodata
   grass_pal dd 0x00000000, 0xFF10AA49, 0xFF006D38, 0xFF797979 ; [0]
@@ -424,5 +425,9 @@ section .rodata
   grass_shadow_tile db 38, 1, 38, 0 ; [15]
 
   palette_indices db 0, 1, 2, 2, 3, 6, 6, 6, 4, 4, 4, 5, 5, 5, 5, 0
+
+  animated_indices: 
+    db 2
+    db 2, 3
 
 section .note.GNU-stack noalloc noexec nowrite progbits

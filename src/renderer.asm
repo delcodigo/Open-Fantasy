@@ -1,3 +1,5 @@
+%include "src/constants.inc"
+
 extern glBindTexture
 extern glTexSubImage2D
 extern glViewport
@@ -10,7 +12,11 @@ extern grass_tile_1
 extern grass_tile
 extern palette_indices
 extern grass_pal
-extern rendererDrawMap
+extern animated_indices
+
+extern indexOfByte
+
+extern spriteAnimationUpdate
 
 global frameBuffer
 global rendererUpdateFrameBuffer
@@ -19,15 +25,16 @@ global rendererDrawMacroSprite
 global rendererClearFrameBuffer
 global rendererFrameBufferResizeCallback
 global rendererDrawTile
+global rendererDrawMap
+global rendererUpdateAnimationFrameIndex
 global cameraX
 global cameraY
 
 section .bss
+  cameraX resd 1
+  cameraY resd 1
+  worldFI resd 1
   frameBuffer resb 245760
-
-section .data
-  cameraX dd 0
-  cameraY dd 0
 
 section .text
 
@@ -324,6 +331,13 @@ rendererDrawTile_loop:
   ret
 
 ; -------------------------------------------------------------
+rendererUpdateAnimationFrameIndex:
+  lea rdi, [rel worldFI]
+  mov rsi, 2
+  mov rdx, WORLD_ANIM_SPEED
+  jmp spriteAnimationUpdate
+
+; -------------------------------------------------------------
 ; rdi: pointer to map
 ; -------------------------------------------------------------
 rendererDrawMap:
@@ -376,6 +390,23 @@ rendererDrawMap_verticalLoop:
 
 rendererDrawMap_horizontalLoop:
   movzx eax, byte [r12]
+
+  lea rdi, [rel animated_indices]
+  movzx esi, byte [rdi]
+  inc rdi
+  mov edx, eax
+  call indexOfByte
+
+  cmp rax, 0
+  movzx eax, byte [r12]
+  jl rendererDrawMap_NoAnimatedFrame
+
+  mov ecx, [rel worldFI]
+  shr rcx, 16
+  add rax, rcx
+
+rendererDrawMap_NoAnimatedFrame:
+  
   lea rcx, [rel palette_indices]
   movzx r8d, byte [rcx + rax]
   shl r8, 4

@@ -49,6 +49,7 @@ extern rendererDrawSprite
 extern rendererDrawMacroSprite
 extern rendererFrameBufferResizeCallback
 extern rendererDrawMap
+extern rendererUpdateAnimationFrameIndex
 
 extern warrior_ow_fd
 extern warrior_ow_pal
@@ -216,6 +217,7 @@ _start_window_loop_can_update:
   jb _start_window_loop_no_update_yet
 
   call playerOverworld_update
+  call rendererUpdateAnimationFrameIndex
 
   movsd xmm0, [rel timeAccumulator]
   subsd xmm0, [rel fixedDeltaTime]

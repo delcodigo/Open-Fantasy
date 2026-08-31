@@ -1,10 +1,6 @@
 global spriteAnimationUpdate
 global spriteAnimationRoundFrame
 
-section .rodata
-  frameSpeed dd 0x00002222
-  frameCount dd 4 << 16
-
 section .text
 
 ; -------------------------------------------------------------
@@ -18,21 +14,23 @@ spriteAnimationRoundFrame:
   ret
 
 ; -------------------------------------------------------------
-; rdi: pointer to frameIndex
+; rdi: pointer to frameIndex, rsi: frameCount, rdx: frameSpeed
 ; -------------------------------------------------------------
 spriteAnimationUpdate:
   mov eax, [rdi]
-  add eax, [rel frameSpeed]
+  add rax, rdx
 
 spriteAnimationUpdate_updateFrame:
   mov [rdi], eax
   sar eax, 16
   
-  cmp eax, 4
+  cmp eax, esi
   jl spriteAnimationUpdate_return
 
+  shl rsi, 16
+
   shl eax, 16
-  sub eax, [rel frameCount]
+  sub eax, esi
   jmp spriteAnimationUpdate_updateFrame
 
 spriteAnimationUpdate_return:
