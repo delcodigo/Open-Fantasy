@@ -11,6 +11,7 @@ extern rendererDrawMap
 extern rendererUpdateAnimationFrameIndex
 
 extern town_test
+extern house_test
 
 extern sceneUpdate
 extern sceneRender
@@ -24,7 +25,7 @@ section .text
 sceneOverworldInit:
   sub rsp, 8
 
-  lea rax, [rel town_test]
+  lea rax, [rel house_test]
   mov qword [rel currentMap], rax
 
   lea rax, [rel sceneOverworldUpdate]

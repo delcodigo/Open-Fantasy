@@ -390,6 +390,7 @@ rendererDrawMap_verticalLoop:
 
 rendererDrawMap_horizontalLoop:
   movzx eax, byte [r12]
+  dec eax
 
   lea rdi, [rel animated_indices]
   movzx esi, byte [rdi]
@@ -399,6 +400,7 @@ rendererDrawMap_horizontalLoop:
 
   cmp rax, 0
   movzx eax, byte [r12]
+  lea eax, [eax - 1]
   jl rendererDrawMap_noAnimatedFrame
 
   mov ecx, [rel worldFI]

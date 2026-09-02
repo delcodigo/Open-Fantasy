@@ -45,6 +45,8 @@ section .text
 
 ; -------------------------------------------------------------
 playerOverworldInit:
+  mov dword [rel playerX], 8 << 20
+  mov dword [rel playerY], 10 << 20
   ret
 
 ; -------------------------------------------------------------
