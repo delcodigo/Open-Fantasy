@@ -1,13 +1,5 @@
 %include "src/constants.inc"
 
-%define PLAYER_SM_IDLE 0
-%define PLAYER_SM_WALK 1
-
-%define PLAYER_DIR_DOWN 0
-%define PLAYER_DIR_RIGHT 1
-%define PLAYER_DIR_LEFT 2
-%define PLAYER_DIR_UP 3
-
 extern rendererDrawMacroSprite
 extern cameraX
 extern cameraY
@@ -27,6 +19,8 @@ extern spriteAnimationRoundFrame
 extern spriteAnimationUpdate
 
 extern mapIsTileSolid
+extern mapGetEventAt
+extern mapEventExecute
 
 global playerOverworldInit
 global playerOverworldUpdate
@@ -40,13 +34,19 @@ section .bss
   playerFI resd 1
   playerSM resb 1
   playerDir resb 1
+  playerEvent resq 1
 
 section .text
 
-; -------------------------------------------------------------
+; edi: x, esi: y, dl: dir
 playerOverworldInit:
-  mov dword [rel playerX], 8 << 20
-  mov dword [rel playerY], 10 << 20
+  shl rdi, 20
+  shl esi, 20
+  mov dword [rel playerX], edi
+  mov dword [rel playerY], esi
+  mov byte [rel playerDir], dl
+  mov byte [rel playerSM], PLAYER_SM_IDLE
+  mov qword [rel playerEvent], 0
   ret
 
 ; -------------------------------------------------------------
@@ -57,6 +57,8 @@ playerOverworldUpdate:
   jz playerOverworldUpdate_idle
   cmp byte [rel playerSM], PLAYER_SM_WALK
   jz playerOverworldUpdate_walk
+  cmp byte [rel playerSM], PLAYER_SM_EVENT
+  jz playerOverworldUpdate_executeEvent
 
 playerOverworldUpdate_idle:
   call playerOverworldUpdateMovementKeyPress
@@ -64,7 +66,13 @@ playerOverworldUpdate_idle:
 
 playerOverworldUpdate_walk:
   call playerOverworldUpdateMovement
+  jmp playerOverworldUpdate_return
 
+playerOverworldUpdate_executeEvent:
+  mov byte [rel playerSM], PLAYER_SM_NONE
+  mov rdi, [rel playerEvent]
+  call mapEventExecute
+  
 playerOverworldUpdate_return:
   call playerOverworldUpdateCamera
   add rsp, 8
@@ -108,6 +116,15 @@ playerOverworldUpdateMovementCheckFinish_true:
   lea rdi, [rel playerFI]
   call spriteAnimationRoundFrame
 
+  mov edi, [rel playerX]
+  mov esi, [rel playerY]
+  call mapGetEventAt
+  test rax, rax
+  jz playerOverworldUpdateMovementCheckFinish_noEvent
+  mov byte [rel playerSM], PLAYER_SM_EVENT
+  mov qword [rel playerEvent], rax
+
+playerOverworldUpdateMovementCheckFinish_noEvent:
   call playerOverworldUpdateMovementKeyPress
 
   mov eax, 1
@@ -316,8 +333,8 @@ playerOverworldGetSprite_notLeft:
 
 ; -------------------------------------------------------------
 playerOverworldUpdateAnimationFrame:
-  cmp byte [rel playerSM], PLAYER_SM_IDLE
-  jz playerOverworldUpdateAnimationFrame_idle
+  cmp byte [rel playerSM], PLAYER_SM_WALK
+  jnz playerOverworldUpdateAnimationFrame_idle
   lea rdi, [rel playerFI]
   mov rsi, 4
   mov rdx, CHARACTERS_ANIM_SPEED

@@ -355,7 +355,7 @@ rendererDrawMap:
   shr r8, 20
   add rax, r8
 
-  lea r12, [rdi + rax + 2]
+  lea r12, [rdi + rax + 10]
   mov r14d, [rel cameraY]
   shr r14, 20
 
