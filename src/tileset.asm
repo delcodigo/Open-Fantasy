@@ -875,6 +875,6 @@ section .rodata
   solid_tiles:
     db 18
     db 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14,
-    db 16, 17, 18, 23, 24, 25
+    db 16, 17, 18, 23, 24, 26
 
 section .note.GNU-stack noalloc noexec nowrite progbits

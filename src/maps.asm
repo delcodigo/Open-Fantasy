@@ -13,6 +13,8 @@ extern indexOfByte
 extern currentMap
 extern swapSceneEvent
 
+extern fadeActive
+
 section .rodata
   town_test: 
     db 20, 23
@@ -155,6 +157,7 @@ mapEventExecute:
   jnz mapEventExecute_noEvent
 
   mov qword [rel swapSceneEvent], rdi
+  mov byte [rel fadeActive], 1
 
 mapEventExecute_noEvent:
   add rsp, 8

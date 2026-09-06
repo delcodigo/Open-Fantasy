@@ -17,6 +17,9 @@ extern house_test
 extern sceneUpdate
 extern sceneRender
 
+extern fadeActive
+extern fadeUpdate
+
 section .bss
   currentMap resq 1
   swapSceneEvent resq 1
@@ -64,14 +67,28 @@ sceneOverworldSwapScene:
 ; -------------------------------------------------------------
 sceneOverworldUpdate:
   sub rsp, 8
+
+  cmp byte [rel fadeActive], 0
+  jz sceneOverworldUpdate_noFade
+  call fadeUpdate
+
+  cmp byte [rel fadeActive], 1
+  jz sceneOverworldUpdate_noUpdate
+
+sceneOverworldUpdate_noFade:
   mov rdi, [rel swapSceneEvent]
   cmp rdi, 0
   jz sceneOverworldUpdate_noSwap
   call sceneOverworldSwapScene
 
 sceneOverworldUpdate_noSwap:
+  cmp byte [rel fadeActive], 0
+  ja sceneOverworldUpdate_noUpdate
+
   call playerOverworldUpdate
   call rendererUpdateAnimationFrameIndex
+
+sceneOverworldUpdate_noUpdate:
   add rsp, 8
   ret
 

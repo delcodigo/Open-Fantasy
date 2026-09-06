@@ -18,6 +18,9 @@ extern indexOfByte
 
 extern spriteAnimationUpdate
 
+extern fadeY
+extern fadeActive
+
 global frameBuffer
 global rendererUpdateFrameBuffer
 global rendererDrawSprite
@@ -187,6 +190,12 @@ rendererDrawSprite_line:
   cmp r10, 239
   jg rendererDrawSprite_skipRender
 
+  cmp byte [rel fadeActive], 0
+  jz rendererDrawSprite_noFade
+  cmp r10b, byte [rel fadeY]
+  jbe rendererDrawSprite_skipRender
+
+rendererDrawSprite_noFade:
   mov r10, r8
   shl r10, 2
 
