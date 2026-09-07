@@ -128,27 +128,37 @@ rendererUpdateFrameBuffer:
   ret
 
 ; -------------------------------------------------------------
-; rendererDrawSprite(edi: x, esi: y, rdx: sprite, rcx: palette)
+; rendererDrawSpriteWithClip(edi: x, esi: y, rdx: sprite, rcx: palette)
 ;
 ; Draws an 8x8 sprite using 2bpp indexed sprites and a palette
 ;
 ; -------------------------------------------------------------
-rendererDrawSprite:
+rendererDrawSpriteWithClip:
   push r12
   push r13
   push r14
   push r15
 
-  movsxd rdi, edi
-  movsxd rsi, esi
+  mov r12, rsi
+  shl r12, 8
+  add r12, rdi
+  shl r12, 2
 
   xor r14, r14
   lea r13, [rel frameBuffer]
 
-rendererDrawSprite_verticalLoop:
+rendererDrawSpriteWithClip_verticalLoop:
   xor r8, r8
 
-rendererDrawSprite_horizontalLoop:
+  mov r10, rsi
+  add r10, r14
+
+  cmp byte [rel fadeActive], 0
+  jz rendererDrawSpriteWithClip_horizontalLoop
+  cmp r10b, byte [rel fadeY]
+  jbe rendererDrawSpriteWithClip_skipLine
+
+rendererDrawSpriteWithClip_horizontalLoop:
   mov r10, r14
   shl r10, 1
   add r10, r8
@@ -156,13 +166,13 @@ rendererDrawSprite_horizontalLoop:
 
   xor r9, r9
 
-rendererDrawSprite_line:
+rendererDrawSpriteWithClip_line:
   mov eax, r15d
   shr eax, 6
   and eax, 0b11
 
-  cmp eax, 0
-  je rendererDrawSprite_skipRender
+  test eax, eax
+  jz rendererDrawSpriteWithClip_skipRender
 
   mov eax, [rcx + rax * 4]
 
@@ -170,71 +180,353 @@ rendererDrawSprite_line:
   shl r10, 2
   add r10, rdi
   add r10, r9
-  movsxd r11, [rel cameraX]
-  sar r11, 16
-  sub r10, r11
   
-  cmp r10, 0
-  jl rendererDrawSprite_skipRender
   cmp r10, 255
-  jg rendererDrawSprite_skipRender
+  ja rendererDrawSpriteWithClip_skipRender
 
   mov r10, rsi
   add r10, r14
-  movsxd r11, [rel cameraY]
-  sar r11, 16
-  sub r10, r11
 
-  cmp r10, 0
-  jl rendererDrawSprite_skipRender
   cmp r10, 239
-  jg rendererDrawSprite_skipRender
-
-  cmp byte [rel fadeActive], 0
-  jz rendererDrawSprite_noFade
-  cmp r10b, byte [rel fadeY]
-  jbe rendererDrawSprite_skipRender
-
-rendererDrawSprite_noFade:
-  mov r10, r8
-  shl r10, 2
-
-  movsxd r11, [rel cameraY]
-  sar r11, 16
-  mov r12, rsi
-  add r12, r14
-  sub r12, r11
-  imul r12, 256
-  add r12, rdi
-  add r12, r10
-  add r12, r9
-  movsxd r11, [rel cameraX]
-  sar r11, 16
-  sub r12, r11
-  shl r12, 2
+  ja rendererDrawSpriteWithClip_skipRender
 
   mov dword [r13 + r12], eax
 
-rendererDrawSprite_skipRender:
+rendererDrawSpriteWithClip_skipRender:
   shl r15d, 2
+
+  add r12, 4
 
   inc r9
   cmp r9, 4
-  jl rendererDrawSprite_line
+  jl rendererDrawSpriteWithClip_line
 
   inc r8
   cmp r8, 2
-  jl rendererDrawSprite_horizontalLoop
+  jl rendererDrawSpriteWithClip_horizontalLoop
 
+  add r12, 992
+
+rendererDrawSpriteWithClip_nextLine:
   inc r14
   cmp r14, 8
-  jl rendererDrawSprite_verticalLoop
+  jl rendererDrawSpriteWithClip_verticalLoop
 
   pop r15
   pop r14
   pop r13
   pop r12
   ret
+
+rendererDrawSpriteWithClip_skipLine:
+  add r12, 1024
+  jmp rendererDrawSpriteWithClip_nextLine
+
+; -------------------------------------------------------------
+; rendererDrawSpriteNoClip(edi: x, esi: y, rdx: sprite, rcx: palette)
+;
+; Draws an 8x8 sprite using 2bpp indexed sprites and a palette
+; it trusts that the sprite lives completely inside the viewport
+;
+; -------------------------------------------------------------
+rendererDrawSpriteNoClip:
+  push r12
+  push r13
+  push r14
+  push r15
+
+  mov r12, rsi
+  shl r12, 8
+  add r12, rdi
+  shl r12, 2
+
+  xor r14, r14
+  lea r13, [rel frameBuffer]
+
+rendererDrawSpriteNoClip_verticalLoop:
+  xor r8, r8
+
+  mov r10, rsi
+  add r10, r14
+
+  cmp byte [rel fadeActive], 0
+  jz rendererDrawSpriteNoClip_horizontalLoop
+  cmp r10b, byte [rel fadeY]
+  jbe rendererDrawSpriteNoClip_skipLine
+
+rendererDrawSpriteNoClip_horizontalLoop:
+  mov r10, r14
+  shl r10, 1
+  add r10, r8
+  movzx r15d, byte [rdx + r10]
+
+  xor r9, r9
+
+rendererDrawSpriteNoClip_line:
+  mov eax, r15d
+  shr eax, 6
+  and eax, 0b11
+
+  test eax, eax
+  jz rendererDrawSpriteNoClip_skipRender
+
+  mov eax, [rcx + rax * 4]
+
+  mov dword [r13 + r12], eax
+
+rendererDrawSpriteNoClip_skipRender:
+  shl r15d, 2
+
+  add r12, 4
+
+  inc r9
+  cmp r9, 4
+  jl rendererDrawSpriteNoClip_line
+
+  inc r8
+  cmp r8, 2
+  jl rendererDrawSpriteNoClip_horizontalLoop
+
+  add r12, 992
+
+rendererDrawSpriteNoClip_nextLine:
+  inc r14
+  cmp r14, 8
+  jl rendererDrawSpriteNoClip_verticalLoop
+
+  pop r15
+  pop r14
+  pop r13
+  pop r12
+  ret
+
+rendererDrawSpriteNoClip_skipLine:
+  add r12, 1024
+  jmp rendererDrawSpriteNoClip_nextLine
+
+; -------------------------------------------------------------
+; rendererDrawSprite(edi: x, esi: y, rdx: sprite, rcx: palette)
+;
+; Draws an 8x8 sprite using 2bpp indexed sprites and a palette
+; depends on if the sprite is fully in viewport or not it calls
+; a fast path or a clipping path
+;
+; -------------------------------------------------------------
+rendererDrawSprite:
+  movsxd rdi, edi
+  movsxd rsi, esi
+
+  movsxd r11, [rel cameraX]
+  sar r11, 16
+  sub rdi, r11
+
+  movsxd r11, [rel cameraY]
+  sar r11, 16
+  sub rsi, r11
+
+  cmp rdi, 248
+  ja rendererDrawSpriteWithClip
+  cmp rsi, 232
+  ja rendererDrawSpriteWithClip
+
+  jmp rendererDrawSpriteNoClip
+
+; -------------------------------------------------------------
+; rendererDrawOpaqueWithClip(edi: x, esi: y, rdx: sprite, rcx: palette)
+;
+; Draws an 8x8 sprite using 2bpp indexed sprites and a palette
+;
+; -------------------------------------------------------------
+rendererDrawOpaqueWithClip:
+  push r12
+  push r13
+  push r14
+  push r15
+
+  mov r12, rsi
+  shl r12, 8
+  add r12, rdi
+  shl r12, 2
+
+  xor r14, r14
+  lea r13, [rel frameBuffer]
+
+rendererDrawOpaqueWithClip_verticalLoop:
+  xor r8, r8
+
+  mov r10, rsi
+  add r10, r14
+
+  cmp byte [rel fadeActive], 0
+  jz rendererDrawOpaqueWithClip_horizontalLoop
+  cmp r10b, byte [rel fadeY]
+  jbe rendererDrawOpaqueWithClip_skipLine
+
+rendererDrawOpaqueWithClip_horizontalLoop:
+  mov r10, r14
+  shl r10, 1
+  add r10, r8
+  movzx r15d, byte [rdx + r10]
+
+  xor r9, r9
+
+rendererDrawOpaqueWithClip_line:
+  mov eax, r15d
+  shr eax, 6
+  and eax, 0b11
+
+  mov eax, [rcx + rax * 4]
+
+  mov r10, r8
+  shl r10, 2
+  add r10, rdi
+  add r10, r9
+  
+  cmp r10, 255
+  ja rendererDrawOpaqueWithClip_skipRender
+
+  mov r10, rsi
+  add r10, r14
+
+  cmp r10, 239
+  ja rendererDrawOpaqueWithClip_skipRender
+
+  mov dword [r13 + r12], eax
+
+rendererDrawOpaqueWithClip_skipRender:
+  shl r15d, 2
+
+  add r12, 4
+
+  inc r9
+  cmp r9, 4
+  jl rendererDrawOpaqueWithClip_line
+
+  inc r8
+  cmp r8, 2
+  jl rendererDrawOpaqueWithClip_horizontalLoop
+
+  add r12, 992
+
+rendererDrawOpaqueWithClip_nextLine:
+  inc r14
+  cmp r14, 8
+  jl rendererDrawOpaqueWithClip_verticalLoop
+
+  pop r15
+  pop r14
+  pop r13
+  pop r12
+  ret
+
+rendererDrawOpaqueWithClip_skipLine:
+  add r12, 1024
+  jmp rendererDrawOpaqueWithClip_nextLine
+
+; -------------------------------------------------------------
+; rendererDrawOpaqueNoClip(edi: x, esi: y, rdx: sprite, rcx: palette)
+;
+; Draws an 8x8 sprite using 2bpp indexed sprites and a palette
+; it trusts that the sprite lives completely inside the viewport
+;
+; -------------------------------------------------------------
+rendererDrawOpaqueNoClip:
+  push r12
+  push r13
+  push r14
+  push r15
+
+  mov r12, rsi
+  shl r12, 8
+  add r12, rdi
+  shl r12, 2
+
+  xor r14, r14
+  lea r13, [rel frameBuffer]
+
+rendererDrawOpaqueNoClip_verticalLoop:
+  xor r8, r8
+
+  mov r10, rsi
+  add r10, r14
+
+  cmp byte [rel fadeActive], 0
+  jz rendererDrawOpaqueNoClip_horizontalLoop
+  cmp r10b, byte [rel fadeY]
+  jbe rendererDrawOpaqueNoClip_skipLine
+
+rendererDrawOpaqueNoClip_horizontalLoop:
+  mov r10, r14
+  shl r10, 1
+  add r10, r8
+  movzx r15d, byte [rdx + r10]
+
+  xor r9, r9
+
+rendererDrawOpaqueNoClip_line:
+  mov eax, r15d
+  shr eax, 6
+  and eax, 0b11
+
+  mov eax, [rcx + rax * 4]
+
+  mov dword [r13 + r12], eax
+
+  shl r15d, 2
+
+  add r12, 4
+
+  inc r9
+  cmp r9, 4
+  jl rendererDrawOpaqueNoClip_line
+
+  inc r8
+  cmp r8, 2
+  jl rendererDrawOpaqueNoClip_horizontalLoop
+
+  add r12, 992
+
+rendererDrawOpaqueNoClip_nextLine:
+  inc r14
+  cmp r14, 8
+  jl rendererDrawOpaqueNoClip_verticalLoop
+
+  pop r15
+  pop r14
+  pop r13
+  pop r12
+  ret
+
+rendererDrawOpaqueNoClip_skipLine:
+  add r12, 1024
+  jmp rendererDrawOpaqueNoClip_nextLine
+
+; -------------------------------------------------------------
+; rendererDrawOpaque(edi: x, esi: y, rdx: sprite, rcx: palette)
+;
+; Draws an 8x8 sprite using 2bpp indexed sprites and a palette
+; depends on if the sprite is fully in viewport or not it calls
+; a fast path or a clipping path
+;
+; -------------------------------------------------------------
+rendererDrawOpaque:
+  movsxd rdi, edi
+  movsxd rsi, esi
+
+  movsxd r11, [rel cameraX]
+  sar r11, 16
+  sub rdi, r11
+
+  movsxd r11, [rel cameraY]
+  sar r11, 16
+  sub rsi, r11
+
+  cmp rdi, 248
+  ja rendererDrawOpaqueWithClip
+  cmp rsi, 232
+  ja rendererDrawOpaqueWithClip
+
+  jmp rendererDrawOpaqueNoClip
 
 ; -------------------------------------------------------------
 ; rendererDrawMacroSprite(edi: x, esi: y, rdx: macro_sprite, rcx: macro_palette)
@@ -253,8 +545,12 @@ rendererDrawMacroSprite:
   xor r15, r15
   xor r13, r13
   mov r12, rdx
-  mov r14, rdi
   mov rbx, rcx
+
+  mov r14d, edi
+  shl r14, 32
+  mov eax, esi
+  or r14, rax
 
 rendererDrawMacroSprite_loop:
   movzx eax, byte [r12 + r15]
@@ -268,7 +564,10 @@ rendererDrawMacroSprite_loop:
   call rendererDrawSprite
 
   mov rdi, r14
+  sar rdi, 32
   add rdi, 8
+
+  movsxd rsi, r14d
   
   inc r15
 
@@ -277,8 +576,10 @@ rendererDrawMacroSprite_loop:
   jl rendererDrawMacroSprite_loop
 
   mov rdi, r14
+  sar rdi, 32
   xor r13, r13
   add rsi, 8
+  add r14, 8
   
   cmp r15, 4
   jl rendererDrawMacroSprite_loop
@@ -307,17 +608,24 @@ rendererDrawTile:
   xor r15, r15
   xor r13, r13
   mov r12, rdx
-  mov r14, rdi
+
+  mov r14d, edi
+  shl r14, 32
+  mov eax, esi
+  or r14, rax
 
 rendererDrawTile_loop:
   movzx rax, byte [r12 + r15]
   shl rax, 4
   lea rdx, [rel grass_tile_1]
   add rdx, rax
-  call rendererDrawSprite
+  call rendererDrawOpaque
 
   mov rdi, r14
+  sar rdi, 32
   add rdi, 8
+
+  mov esi, r14d
   
   inc r15
 
@@ -326,8 +634,10 @@ rendererDrawTile_loop:
   jl rendererDrawTile_loop
 
   mov rdi, r14
+  sar rdi, 32
   xor r13, r13
   add rsi, 8
+  add r14, 8
   
   cmp r15, 4
   jl rendererDrawTile_loop
