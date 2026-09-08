@@ -5,6 +5,7 @@ global house_test
 global mapIsTileSolid
 global mapGetEventAt
 global mapEventExecute
+global mapInitNPCs
 
 extern solid_tiles
 
@@ -15,10 +16,15 @@ extern swapSceneEvent
 
 extern fadeActive
 
+extern npcOverworld_init
+extern npcs
+extern npcsSize
+
 section .rodata
   town_test: 
     db 20, 23
     dq town_test_events
+    dq town_test_npcs
     db 1,1,1,1,1,1,1,5,5,5,5,5,3,1,1,1,1,1,1,1,
     db 1,5,1,1,1,1,5,5,5,5,5,5,3,5,5,1,1,1,1,1,
     db 1,1,14,14,14,14,1,5,5,5,5,3,3,5,14,14,14,14,1,1,
@@ -51,10 +57,20 @@ section .rodata
     dq house_test
     db 8, 9, PLAYER_DIR_UP
     times EVENT_SIZE - ($ - town_test_event0) db 0
+
+  town_test_npcs:
+    db 2
+    dd 64, 16
+    dw 0
+    db 0
+    dd 96, 32
+    dw 1
+    db 1
   
   house_test:
     db 16, 15
     dq house_test_events
+    dq house_test_npcs
     db 19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,
     db 19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,
     db 19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,
@@ -79,6 +95,9 @@ section .rodata
     dq town_test
     db 4, 5, PLAYER_DIR_DOWN
     times EVENT_SIZE - ($ - house_test_event0) db 0
+  
+  house_test_npcs:
+    db 0
 
 section .text
 
@@ -91,7 +110,7 @@ mapIsTileSolid:
   movzx edx, byte [rax]
   imul esi, edx
   add rsi, rdi
-  add rsi, 10
+  add rsi, 18
 
   movzx rdx, byte [rax + rsi]
   dec rdx
@@ -161,6 +180,58 @@ mapEventExecute:
 
 mapEventExecute_noEvent:
   add rsp, 8
+  ret
+
+; -------------------------------------------------------------
+mapInitNPCs:
+  push r12 
+  push r13
+  push r14
+
+  lea r13, [rel npcs]
+  mov rdi, [rel currentMap]
+  mov r14, qword [rdi + 10]
+
+  movzx r12d, byte [r14]
+  inc r14
+
+  mov byte [rel npcsSize], r12b
+
+mapInitNPCs_loop:
+  test r12d, r12d 
+  jz mapInitNPCs_done
+
+  dec r12
+
+  mov rdi, r12
+  call npcOverworld_init
+
+  mov rcx, r12
+  imul rcx, NPC_STRUCT_SIZE
+  lea rdi, [r13 + rcx]
+
+  mov r8d, dword [r14]
+  shl r8, 16
+  mov dword [rdi], r8d
+
+  mov r8d, dword [r14 + 4]
+  shl r8, 16
+  mov dword [rdi + 4], r8d
+
+  movzx r8d, word [r14 + 8]
+  mov word [rdi + 20], r8w
+
+  mov r8b, byte [r14 + 10]
+  mov byte [rdi + 22], r8b
+
+  add r14, 11
+
+  jmp mapInitNPCs_loop
+
+mapInitNPCs_done:
+  pop r14
+  pop r13
+  pop r12
   ret
 
 section .note.GNU-stack noalloc noexec nowrite progbits

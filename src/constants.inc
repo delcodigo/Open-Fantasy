@@ -23,3 +23,6 @@
 
 %define EVENT_EXIT 1
 %define EVENT_SIZE 16
+
+%define NPC_STRUCT_SIZE 25
+%define NPC_MAX 16

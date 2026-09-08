@@ -20,6 +20,11 @@ extern sceneRender
 extern fadeActive
 extern fadeUpdate
 
+extern npcOverworldRender
+extern npcsSize
+
+extern mapInitNPCs
+
 section .bss
   currentMap resq 1
   swapSceneEvent resq 1
@@ -44,6 +49,8 @@ sceneOverworldInit:
   mov dl, 0
   call playerOverworldInit
 
+  call mapInitNPCs
+
   add rsp, 8
   ret
 
@@ -58,6 +65,8 @@ sceneOverworldSwapScene:
   movzx esi, byte [r8 + 12]
   movzx rdx, byte [r8 + 13]
   call playerOverworldInit
+
+  call mapInitNPCs
 
   mov qword [rel swapSceneEvent], 0
 
@@ -94,12 +103,25 @@ sceneOverworldUpdate_noUpdate:
 
 ; -------------------------------------------------------------
 sceneOverworldRender:
-  sub rsp, 8
+  push r12
   mov rdi, [rel currentMap]
   call rendererDrawMap
 
   call playerOverworldRender
-  add rsp, 8
+
+  movzx r12d, byte [rel npcsSize]
+  test r12d, r12d
+  jz sceneOverworldRender_done
+
+sceneOverworldRender_npcs:
+  dec r12
+  mov rdi, r12
+  call npcOverworldRender
+  cmp r12, 0
+  jg sceneOverworldRender_npcs
+
+sceneOverworldRender_done:
+  pop r12
   ret
 
 section .note.GNU-stack noalloc noexec nowrite progbits
