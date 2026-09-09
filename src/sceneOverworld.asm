@@ -20,6 +20,7 @@ extern sceneRender
 extern fadeActive
 extern fadeUpdate
 
+extern npcOverworldUpdate
 extern npcOverworldRender
 extern npcsSize
 
@@ -96,6 +97,17 @@ sceneOverworldUpdate_noSwap:
 
   call playerOverworldUpdate
   call rendererUpdateAnimationFrameIndex
+
+  movzx r12d, byte [rel npcsSize]
+  test r12d, r12d
+  jz sceneOverworldUpdate_noUpdate
+
+sceneOverworldUpdate_npcs:
+  dec r12
+  mov rdi, r12
+  call npcOverworldUpdate
+  cmp r12, 0
+  jg sceneOverworldUpdate_npcs
 
 sceneOverworldUpdate_noUpdate:
   add rsp, 8

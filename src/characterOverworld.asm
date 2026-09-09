@@ -49,9 +49,19 @@ characterOverworldGetSprite_notLeft:
 ; -------------------------------------------------------------
 characterOverworldUpdateAnimationFrame:
   cmp sil, CHARACTER_SM_WALK
-  jnz characterOverworldUpdateAnimationFrame_idle
+  jz characterOverworldUpdateAnimationFrame_walk
+  cmp sil, CHARACTER_SM_IDLE_WALK
+  jz characterOverworldUpdateAnimationFrame_idleWalk
+  jmp characterOverworldUpdateAnimationFrame_idle
+
+characterOverworldUpdateAnimationFrame_walk:
   mov rsi, 4
   mov rdx, CHARACTERS_ANIM_SPEED
+  jmp spriteAnimationUpdate
+
+characterOverworldUpdateAnimationFrame_idleWalk:
+  mov rsi, 4
+  mov rdx, CHARACTERS_ANIM_IDLE_SPEED
   jmp spriteAnimationUpdate
 
 characterOverworldUpdateAnimationFrame_idle:

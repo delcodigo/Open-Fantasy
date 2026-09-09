@@ -8,14 +8,16 @@ extern warrior_ow_pal
 extern characterOverworldGetSprite
 extern characterOverworldUpdateAnimationFrame
 
-global npcOverworld_init
+global npcOverworldInit
+global npcOverworldUpdateIdleWalk
+global npcOverworldUpdate
 global npcOverworldRender
 global npcs
 global npcsSize
 
 section .bss
   npcsSize resb 1
-; npc(x: 32bit, y: 32bit, xt: 32bit, yt: 32bit, fi: 32bit, sprIn: 16bit, palIn: 8bit, dir: 8bit, sm: 8bit) - 25 bytes per npc
+; npc(x: 32bit, y: 32bit, xt: 32bit, yt: 32bit, fi: 32bit, sprIn: 16bit, palIn: 8bit, dir: 8bit, sm: 8bit, upd: 64 bit) - 33 bytes per npc
   npcs resb NPC_STRUCT_SIZE * NPC_MAX
 
 section .text
@@ -23,7 +25,7 @@ section .text
 ; -------------------------------------------------------------
 ; rdi: npcOffset
 ; -------------------------------------------------------------
-npcOverworld_init:
+npcOverworldInit:
   mov rdx, rdi
   imul rdx, NPC_STRUCT_SIZE
   lea rax, [rel npcs]
@@ -35,6 +37,22 @@ npcOverworld_init:
   rep stosb
 
   ret
+
+; -------------------------------------------------------------
+npcOverworldUpdateIdleWalk:
+  mov byte [rdi + NPC_STRUCT_SM], CHARACTER_SM_IDLE_WALK
+  mov byte [rdi + NPC_STRUCT_DIR], CHARACTER_DIR_DOWN
+  ret
+
+; -------------------------------------------------------------
+; rdi: npcOffset
+; -------------------------------------------------------------
+npcOverworldUpdate:
+  imul rdi, NPC_STRUCT_SIZE
+  lea rax, [rel npcs]
+  add rdi, rax
+
+  jmp qword [rdi + NPC_STRUCT_UPD]
 
 ; -------------------------------------------------------------
 ; rdi: npcOffset

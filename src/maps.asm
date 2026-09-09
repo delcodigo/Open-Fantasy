@@ -16,7 +16,8 @@ extern swapSceneEvent
 
 extern fadeActive
 
-extern npcOverworld_init
+extern npcOverworldInit
+extern npcOverworldUpdateIdleWalk
 extern npcs
 extern npcsSize
 
@@ -55,7 +56,7 @@ section .rodata
     db EVENT_EXIT
     db 4, 4
     dq house_test
-    db 8, 9, PLAYER_DIR_UP
+    db 8, 9, CHARACTER_DIR_UP
     times EVENT_SIZE - ($ - town_test_event0) db 0
 
   town_test_npcs:
@@ -63,9 +64,12 @@ section .rodata
     dd 64, 16
     dw 0
     db 0
+    dq npcOverworldUpdateIdleWalk
+
     dd 96, 32
     dw 1
     db 1
+    dq npcOverworldUpdateIdleWalk
   
   house_test:
     db 16, 15
@@ -93,7 +97,7 @@ section .rodata
     db EVENT_EXIT
     db 8, 10
     dq town_test
-    db 4, 5, PLAYER_DIR_DOWN
+    db 4, 5, CHARACTER_DIR_DOWN
     times EVENT_SIZE - ($ - house_test_event0) db 0
   
   house_test_npcs:
@@ -204,7 +208,7 @@ mapInitNPCs_loop:
   dec r12
 
   mov rdi, r12
-  call npcOverworld_init
+  call npcOverworldInit
 
   mov rcx, r12
   imul rcx, NPC_STRUCT_SIZE
@@ -224,7 +228,10 @@ mapInitNPCs_loop:
   mov r8b, byte [r14 + 10]
   mov byte [rdi + NPC_STRUCT_PALIN], r8b
 
-  add r14, 11
+  mov r8, qword [r14 + 11]
+  mov qword [rdi + NPC_STRUCT_UPD], r8
+
+  add r14, 19
 
   jmp mapInitNPCs_loop
 
