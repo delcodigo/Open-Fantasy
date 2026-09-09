@@ -5,6 +5,9 @@ extern rendererDrawMacroSprite
 extern warrior_ow_fd_1
 extern warrior_ow_pal
 
+extern characterOverworldGetSprite
+extern characterOverworldUpdateAnimationFrame
+
 global npcOverworld_init
 global npcOverworldRender
 global npcs
@@ -44,15 +47,24 @@ npcOverworldRender:
   lea rax, [rel npcs]
   add r12, rax
 
-  mov edi, dword [r12]
+  mov sil, byte [r12 + NPC_STRUCT_SM]
+  lea rdi, [r12 + NPC_STRUCT_FI]
+  call characterOverworldUpdateAnimationFrame
+  mov r8, rax
+
+  mov dil, byte [r12 + NPC_STRUCT_DIR]
+  mov si, word [r12 + NPC_STRUCT_SPRIN]
+  call characterOverworldGetSprite
+  movzx r9d, byte [rax + r8]
+  lea r8, [rel warrior_ow_fd_1]
+  lea rdx, [r8 + r9 * 4]
+
+  mov edi, dword [r12 + NPC_STRUCT_X]
   sar rdi, 16
-  mov esi, dword [r12 + 4]
+  mov esi, dword [r12 + NPC_STRUCT_Y]
   sar rsi, 16
-  movzx eax, word [r12 + 20]
-  imul eax, 48
-  lea r11, [rel warrior_ow_fd_1]
-  lea rdx, [r11 + rax]
-  movzx eax, byte [r12 + 22]
+  
+  movzx eax, byte [r12 + NPC_STRUCT_PALIN]
   shl rax, 2
   lea r11, [rel warrior_ow_pal]
   lea rcx, [r11 + rax]

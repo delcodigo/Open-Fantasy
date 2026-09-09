@@ -212,17 +212,17 @@ mapInitNPCs_loop:
 
   mov r8d, dword [r14]
   shl r8, 16
-  mov dword [rdi], r8d
+  mov dword [rdi + NPC_STRUCT_X], r8d
 
   mov r8d, dword [r14 + 4]
   shl r8, 16
-  mov dword [rdi + 4], r8d
+  mov dword [rdi + NPC_STRUCT_Y], r8d
 
   movzx r8d, word [r14 + 8]
-  mov word [rdi + 20], r8w
+  mov word [rdi + NPC_STRUCT_SPRIN], r8w
 
   mov r8b, byte [r14 + 10]
-  mov byte [rdi + 22], r8b
+  mov byte [rdi + NPC_STRUCT_PALIN], r8b
 
   add r14, 11
 
