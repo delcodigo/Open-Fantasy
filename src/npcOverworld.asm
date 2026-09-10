@@ -8,6 +8,7 @@ extern warrior_ow_pal
 extern characterOverworldGetSprite
 extern characterOverworldUpdateAnimationFrame
 
+global npcOverworldGeNPCAt
 global npcOverworldInit
 global npcOverworldUpdateIdleWalk
 global npcOverworldUpdate
@@ -36,6 +37,42 @@ npcOverworldInit:
   mov ecx, NPC_STRUCT_SIZE
   rep stosb
 
+  ret
+
+; -------------------------------------------------------------
+; edi: x, esi: y
+; -------------------------------------------------------------
+npcOverworldGeNPCAt:
+  sar edi, 20
+  sar esi, 20
+
+  movzx edx, byte [rel npcsSize]
+  lea rcx, [rel npcs]
+
+npcOverworldGeNPCAt_loop:
+  test rdx, rdx
+  jz npcOverworldGeNPCAt_noResult  
+
+  dec rdx
+
+  mov r8, rdx
+  imul r8, NPC_STRUCT_SIZE
+  lea rax, [rcx + r8]
+
+  mov r8d, dword [rax + NPC_STRUCT_X]
+  sar r8d, 20
+  cmp edi, r8d
+  jnz npcOverworldGeNPCAt_loop
+
+  mov r8d, dword [rax + NPC_STRUCT_Y]
+  sar r8d, 20
+  cmp esi, r8d
+  jnz npcOverworldGeNPCAt_loop
+
+  ret
+
+npcOverworldGeNPCAt_noResult:
+  xor rax, rax
   ret
 
 ; -------------------------------------------------------------

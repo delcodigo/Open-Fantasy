@@ -16,6 +16,7 @@ extern swapSceneEvent
 
 extern fadeActive
 
+extern npcOverworldGeNPCAt
 extern npcOverworldInit
 extern npcOverworldUpdateIdleWalk
 extern npcs
@@ -105,10 +106,19 @@ section .rodata
 
 section .text
 
-; rdi: x, rsi: y
+; -------------------------------------------------------------
+; edi: x, esi: y
+; -------------------------------------------------------------
 mapIsTileSolid:
-  shr rdi, 20
-  shr rsi, 20
+  sub rsp, 8
+  push r12
+  push r13
+
+  mov r12d, edi
+  mov r13d, esi
+
+  sar edi, 20
+  sar esi, 20
 
   mov rax, [rel currentMap]
   movzx edx, byte [rax]
@@ -123,18 +133,30 @@ mapIsTileSolid:
   movzx esi, byte [rdi]
   inc rdi
 
-  sub rsp, 8
   call indexOfByte
-  add rsp, 8
 
   test rax, rax
-  jl mapIsTileSolid_notSolid
+  jl mapIsTileSolid_checkNPC
 
   mov rax, 1
-  ret
+  jmp mapIsTileSolid_done
+
+mapIsTileSolid_checkNPC:
+  mov edi, r12d
+  mov esi, r13d
+  call npcOverworldGeNPCAt
+  test rax, rax
+  jz mapIsTileSolid_notSolid
+  mov rax, 1
+  jmp mapIsTileSolid_done
 
 mapIsTileSolid_notSolid:
   xor rax, rax
+
+mapIsTileSolid_done:
+  pop r13
+  pop r12
+  add rsp, 8
   ret
 
 ; rdi: x, rsi: y
