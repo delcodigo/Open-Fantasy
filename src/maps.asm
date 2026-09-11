@@ -16,11 +16,17 @@ extern swapSceneEvent
 
 extern fadeActive
 
-extern npcOverworldGeNPCAt
+extern npcOverworldGetNPCAt
 extern npcOverworldInit
 extern npcOverworldUpdateIdleWalk
+extern npcOverworldUpdateWanderer
 extern npcs
 extern npcsSize
+
+extern playerX
+extern playerXT
+extern playerY
+extern playerYT
 
 section .rodata
   town_test: 
@@ -70,7 +76,7 @@ section .rodata
     dd 96, 32
     dw 1
     db 1
-    dq npcOverworldUpdateIdleWalk
+    dq npcOverworldUpdateWanderer
   
   house_test:
     db 16, 15
@@ -107,15 +113,16 @@ section .rodata
 section .text
 
 ; -------------------------------------------------------------
-; edi: x, esi: y
+; edi: x, esi: y, dl: isPlayer
 ; -------------------------------------------------------------
 mapIsTileSolid:
-  sub rsp, 8
   push r12
   push r13
+  push r14
 
   mov r12d, edi
   mov r13d, esi
+  movzx r14d, dl
 
   sar edi, 20
   sar esi, 20
@@ -144,9 +151,45 @@ mapIsTileSolid:
 mapIsTileSolid_checkNPC:
   mov edi, r12d
   mov esi, r13d
-  call npcOverworldGeNPCAt
+  call npcOverworldGetNPCAt
   test rax, rax
-  jz mapIsTileSolid_notSolid
+  jz mapIsTileSolid_checkPlayer
+  mov rax, 1
+  jmp mapIsTileSolid_done
+
+mapIsTileSolid_checkPlayer:
+  test r14, r14
+  jnz mapIsTileSolid_notSolid
+
+  mov edi, r12d
+  sar edi, 20
+  mov esi, r13d
+  sar esi, 20
+
+  mov r10d, [rel playerX]
+  sar r10d, 20
+  cmp edi, r10d
+  jnz mapIsTileSolid_checkPlayerTarget
+
+  mov r10d, [rel playerY]
+  sar r10d, 20
+  cmp esi, r10d
+  jnz mapIsTileSolid_checkPlayerTarget
+
+  mov rax, 1
+  jmp mapIsTileSolid_done
+
+mapIsTileSolid_checkPlayerTarget:
+  mov r10d, [rel playerXT]
+  sar r10d, 20
+  cmp edi, r10d
+  jnz mapIsTileSolid_notSolid
+
+  mov r10d, [rel playerYT]
+  sar r10d, 20
+  cmp esi, r10d
+  jnz mapIsTileSolid_notSolid
+
   mov rax, 1
   jmp mapIsTileSolid_done
 
@@ -154,9 +197,9 @@ mapIsTileSolid_notSolid:
   xor rax, rax
 
 mapIsTileSolid_done:
+  pop r14
   pop r13
   pop r12
-  add rsp, 8
   ret
 
 ; rdi: x, rsi: y
@@ -239,10 +282,14 @@ mapInitNPCs_loop:
   mov r8d, dword [r14]
   shl r8, 16
   mov dword [rdi + NPC_STRUCT_X], r8d
+  mov dword [rdi + NPC_STRUCT_XP], r8d
+  mov dword [rdi + NPC_STRUCT_XT], r8d
 
   mov r8d, dword [r14 + 4]
   shl r8, 16
   mov dword [rdi + NPC_STRUCT_Y], r8d
+  mov dword [rdi + NPC_STRUCT_YP], r8d
+  mov dword [rdi + NPC_STRUCT_YT], r8d
 
   movzx r8d, word [r14 + 8]
   mov word [rdi + NPC_STRUCT_SPRIN], r8w
@@ -252,6 +299,8 @@ mapInitNPCs_loop:
 
   mov r8, qword [r14 + 11]
   mov qword [rdi + NPC_STRUCT_UPD], r8
+
+  mov word [rdi + NPC_STRUCT_TIME], 120
 
   add r14, 19
 

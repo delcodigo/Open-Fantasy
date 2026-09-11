@@ -24,16 +24,21 @@ extern mapEventExecute
 
 extern characterOverworldGetSprite
 extern characterOverworldUpdateAnimationFrame
+extern characterOverworldUpdateMovement
 
 global playerOverworldInit
 global playerOverworldUpdate
 global playerOverworldRender
+global playerX
+global playerXT
+global playerY
+global playerYT
 
 section .bss
   playerX resd 1
   playerY resd 1
-  playerTX resd 1
-  playerTY resd 1
+  playerXT resd 1
+  playerYT resd 1
   playerFI resd 1
   playerSM resb 1
   playerDir resb 1
@@ -68,7 +73,32 @@ playerOverworldUpdate_idle:
   jmp playerOverworldUpdate_return
 
 playerOverworldUpdate_walk:
-  call playerOverworldUpdateMovement
+  lea rdi, [rel playerX]
+  lea rsi, [rel playerY]
+  lea rdx, [rel playerXT]
+  lea rcx, [rel playerYT]
+  call characterOverworldUpdateMovement
+  test rax, rax
+  jz playerOverworldUpdate_return
+
+  mov eax, [rel playerXT]
+  mov [rel playerX], eax
+  mov eax, [rel playerYT]
+  mov [rel playerY], eax
+  mov byte [rel playerSM], CHARACTER_SM_IDLE
+  lea rdi, [rel playerFI]
+  call spriteAnimationRoundFrame
+
+  mov edi, [rel playerX]
+  mov esi, [rel playerY]
+  call mapGetEventAt
+  test rax, rax
+  jz playerOverworldUpdate_walkNoEvent
+  mov byte [rel playerSM], CHARACTER_SM_EVENT
+  mov qword [rel playerEvent], rax
+
+playerOverworldUpdate_walkNoEvent:
+  call playerOverworldUpdateMovementKeyPress
   jmp playerOverworldUpdate_return
 
 playerOverworldUpdate_executeEvent:
@@ -82,107 +112,11 @@ playerOverworldUpdate_return:
   ret
 
 ; -------------------------------------------------------------
-; rdi: isPositiveMovement
-; -------------------------------------------------------------
-playerOverworldUpdateMovementCheckFinish:
-  sub rsp, 8
-
-  test rdi, rdi
-  jnz playerOverworldUpdateMovementCheckFinish_positive
-  
-  mov eax, [rel playerTX]
-  cmp [rel playerX], eax
-  jg playerOverworldUpdateMovementCheckFinish_false
-
-  mov eax, [rel playerTY]
-  cmp [rel playerY], eax
-  jg playerOverworldUpdateMovementCheckFinish_false
-
-  jmp playerOverworldUpdateMovementCheckFinish_true
-
-playerOverworldUpdateMovementCheckFinish_positive:
-  mov eax, [rel playerTX]
-  cmp [rel playerX], eax
-  jl playerOverworldUpdateMovementCheckFinish_false
-
-  mov eax, [rel playerTY]
-  cmp [rel playerY], eax
-  jl playerOverworldUpdateMovementCheckFinish_false
-
-playerOverworldUpdateMovementCheckFinish_true:
-  mov eax, [rel playerTX]
-  mov dword [rel playerX], eax
-  mov eax, [rel playerTY]
-  mov dword [rel playerY], eax
-  mov byte [rel playerSM], CHARACTER_SM_IDLE
-  
-  lea rdi, [rel playerFI]
-  call spriteAnimationRoundFrame
-
-  mov edi, [rel playerX]
-  mov esi, [rel playerY]
-  call mapGetEventAt
-  test rax, rax
-  jz playerOverworldUpdateMovementCheckFinish_noEvent
-  mov byte [rel playerSM], CHARACTER_SM_EVENT
-  mov qword [rel playerEvent], rax
-
-playerOverworldUpdateMovementCheckFinish_noEvent:
-  call playerOverworldUpdateMovementKeyPress
-
-  mov eax, 1
-  add rsp, 8
-  ret
-
-playerOverworldUpdateMovementCheckFinish_false:
-  xor eax, eax
-  add rsp, 8
-  ret
-
-; -------------------------------------------------------------
-playerOverworldUpdateMovement:
-  mov eax, [rel playerX]
-  cmp [rel playerTX], eax
-  jz playerOverworldUpdateMovement_verticalCheck
-  jg playerOverworldUpdateMovement_moveRight
-
-  sub dword [rel playerX], CHARACTERS_MOVEMENT_SPEED
-
-  xor rdi, rdi
-  jmp playerOverworldUpdateMovementCheckFinish
-
-playerOverworldUpdateMovement_moveRight:
-  add dword [rel playerX], CHARACTERS_MOVEMENT_SPEED
-
-  mov rdi, 1
-  jmp playerOverworldUpdateMovementCheckFinish
-
-playerOverworldUpdateMovement_verticalCheck:
-  mov eax, [rel playerY]
-  cmp [rel playerTY], eax
-  jz playerOverworldUpdateMovement_false
-  jg playerOverworldUpdateMovement_moveDown
-
-  sub dword [rel playerY], CHARACTERS_MOVEMENT_SPEED
-
-  xor rdi, rdi
-  jmp playerOverworldUpdateMovementCheckFinish
-
-playerOverworldUpdateMovement_moveDown:
-  add dword [rel playerY], CHARACTERS_MOVEMENT_SPEED
-
-  mov rdi, 1
-  jmp playerOverworldUpdateMovementCheckFinish
-
-playerOverworldUpdateMovement_false:
-  xor eax, eax
-  ret
-
-; -------------------------------------------------------------
 playerOverworldUpdateMovementKeyPressCheckCollision:
   sub rsp, 8
-  mov edi, [rel playerTX]
-  mov esi, [rel playerTY]
+  mov edi, [rel playerXT]
+  mov esi, [rel playerYT]
+  mov rdx, 1
   call mapIsTileSolid
   add rsp, 8
   ret
@@ -195,10 +129,10 @@ playerOverworldUpdateMovementKeyPress:
   cmp byte [rel inputMap + KEY_UP], 1
   jnz playerOverworldUpdateMovementKeyPress_noUp
   mov eax, [rel playerX]
-  mov dword [rel playerTX], eax
+  mov dword [rel playerXT], eax
   mov eax, [rel playerY]
   sub eax, 16 << 16
-  mov dword [rel playerTY], eax
+  mov dword [rel playerYT], eax
   mov byte [rel playerDir], CHARACTER_DIR_UP
   mov rax, 1
 
@@ -214,9 +148,9 @@ playerOverworldUpdateMovementKeyPress_noUp:
   jnz playerOverworldUpdateMovementKeyPress_noLeft
   mov eax, [rel playerX]
   sub eax, 16 << 16
-  mov dword [rel playerTX], eax
+  mov dword [rel playerXT], eax
   mov eax, [rel playerY]
-  mov dword [rel playerTY], eax
+  mov dword [rel playerYT], eax
   mov byte [rel playerDir], CHARACTER_DIR_LEFT
   mov rax, 1
 
@@ -231,10 +165,10 @@ playerOverworldUpdateMovementKeyPress_noLeft:
   cmp byte [rel inputMap + KEY_DOWN], 1
   jnz playerOverworldUpdateMovementKeyPress_noDown
   mov eax, [rel playerX]
-  mov dword [rel playerTX], eax
+  mov dword [rel playerXT], eax
   mov eax, [rel playerY]
   add eax, 16 << 16
-  mov dword [rel playerTY], eax
+  mov dword [rel playerYT], eax
   mov byte [rel playerDir], CHARACTER_DIR_DOWN
   mov rax, 1
 
@@ -250,9 +184,9 @@ playerOverworldUpdateMovementKeyPress_noDown:
   jnz playerOverworldUpdateMovementKeyPress_return
   mov eax, [rel playerX]
   add eax, 16 << 16
-  mov dword [rel playerTX], eax
+  mov dword [rel playerXT], eax
   mov eax, [rel playerY]
-  mov dword [rel playerTY], eax
+  mov dword [rel playerYT], eax
   mov byte [rel playerDir], CHARACTER_DIR_RIGHT
   mov rax, 1
 
