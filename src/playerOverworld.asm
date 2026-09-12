@@ -26,6 +26,9 @@ extern characterOverworldGetSprite
 extern characterOverworldUpdateAnimationFrame
 extern characterOverworldUpdateMovement
 
+extern npcOverworldFaceAt
+extern npcOverworldGetNPCAt
+
 global playerOverworldInit
 global playerOverworldUpdate
 global playerOverworldRender
@@ -70,6 +73,9 @@ playerOverworldUpdate:
 
 playerOverworldUpdate_idle:
   call playerOverworldUpdateMovementKeyPress
+  test rax, rax
+  jnz playerOverworldUpdate_return
+  call playerOverworldUpdateAction
   jmp playerOverworldUpdate_return
 
 playerOverworldUpdate_walk:
@@ -108,6 +114,53 @@ playerOverworldUpdate_executeEvent:
   
 playerOverworldUpdate_return:
   call playerOverworldUpdateCamera
+  add rsp, 8
+  ret
+
+; -------------------------------------------------------------
+playerOverworldUpdateAction:
+  sub rsp, 8
+  
+  cmp byte [rel inputMap + KEY_E], 1
+  jnz playerOverworldUpdateAction_return
+  mov byte [rel inputMap + KEY_E], 2
+
+  mov edi, [rel playerX]
+  mov esi, [rel playerY]
+
+  cmp byte [rel playerDir], CHARACTER_DIR_DOWN
+  jnz playerOverworldUpdateAction_notDown
+  add esi, 16 << 16
+  jmp playerOverworldUpdateAction_checkNPC
+
+playerOverworldUpdateAction_notDown:
+  cmp byte [rel playerDir], CHARACTER_DIR_RIGHT
+  jnz playerOverworldUpdateAction_notRight
+  add edi, 16 << 16
+  jmp playerOverworldUpdateAction_checkNPC
+
+playerOverworldUpdateAction_notRight:
+  cmp byte [rel playerDir], CHARACTER_DIR_UP
+  jnz playerOverworldUpdateAction_notUp
+  sub esi, 16 << 16
+  jmp playerOverworldUpdateAction_checkNPC
+
+playerOverworldUpdateAction_notUp:
+  sub edi, 16 << 16
+
+playerOverworldUpdateAction_checkNPC:
+  call npcOverworldGetNPCAt
+  test rax, rax
+  jz playerOverworldUpdateAction_return
+
+  mov rdi, rax
+  mov esi, [rel playerX]
+  mov edx, [rel playerY]
+  call npcOverworldFaceAt
+
+  mov rax, 1
+
+playerOverworldUpdateAction_return:
   add rsp, 8
   ret
 

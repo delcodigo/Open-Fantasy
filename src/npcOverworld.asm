@@ -15,6 +15,7 @@ extern mapIsTileSolid
 
 extern rngNext
 
+global npcOverworldFaceAt
 global npcOverworldGetNPCAt
 global npcOverworldInit
 global npcOverworldUpdateIdleWalk
@@ -45,6 +46,37 @@ npcOverworldInit:
   mov ecx, NPC_STRUCT_SIZE
   rep stosb
 
+  ret
+
+; -------------------------------------------------------------
+; rdi: ptrNPC, esi: x, edx: y
+; -------------------------------------------------------------
+npcOverworldFaceAt:
+  sar esi, 20
+  sar edx, 20
+
+  mov r8d, dword [rdi + NPC_STRUCT_X]
+  sar r8d, 20
+  cmp esi, r8d
+  jz npcOverworldFaceAt_verticalCheck
+  jg npcOverworldFaceAt_lookRight
+  mov byte [rdi + NPC_STRUCT_DIR], CHARACTER_DIR_LEFT
+  ret
+
+npcOverworldFaceAt_lookRight:
+  mov byte [rdi + NPC_STRUCT_DIR], CHARACTER_DIR_RIGHT
+  ret
+
+npcOverworldFaceAt_verticalCheck:
+  mov r8d, dword [rdi + NPC_STRUCT_Y]
+  sar r8d, 20
+  cmp edx, r8d
+  jg npcOverworldFaceAt_lookDown
+  mov byte [rdi + NPC_STRUCT_DIR], CHARACTER_DIR_UP
+  ret
+
+npcOverworldFaceAt_lookDown:
+  mov byte [rdi + NPC_STRUCT_DIR], CHARACTER_DIR_DOWN
   ret
 
 ; -------------------------------------------------------------

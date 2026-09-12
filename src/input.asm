@@ -4,7 +4,7 @@ global inputKeyCallback
 global inputMap
 
 section .bss
-  inputMap resb 4
+  inputMap resb 5
 
 section .note.GNU-stack noalloc noexec nowrite progbits
 
@@ -30,6 +30,9 @@ inputKeyCallback_checkKeys:
   cmp esi, GLFW_KEY_RIGHT
   jz inputKeyCallback_rightKey
 
+  cmp esi, GLFW_KEY_E
+  jz inputKeyCallback_eKey
+
   ret
 
 inputKeyCallback_upKey:
@@ -46,4 +49,14 @@ inputKeyCallback_downKey:
 
 inputKeyCallback_rightKey:
   mov byte [rel inputMap + KEY_RIGHT], dl
+  ret
+
+inputKeyCallback_eKey:
+  cmp byte [rel inputMap + KEY_E], 0
+  jz inputKeyCallback_eKeyDoPress
+  cmp dl, 0
+  jz inputKeyCallback_eKeyDoPress
+  ret
+inputKeyCallback_eKeyDoPress:
+  mov byte [rel inputMap + KEY_E], dl
   ret

@@ -2,10 +2,12 @@
 %define GLFW_KEY_LEFT 263
 %define GLFW_KEY_DOWN 264
 %define GLFW_KEY_UP 265
+%define GLFW_KEY_E 69
 %define KEY_UP 0
 %define KEY_LEFT 1
 %define KEY_DOWN 2
 %define KEY_RIGHT 3
+%define KEY_E 4
 
 %define CHARACTERS_ANIM_SPEED 0x00002222
 %define CHARACTERS_ANIM_IDLE_SPEED 0x00001111
