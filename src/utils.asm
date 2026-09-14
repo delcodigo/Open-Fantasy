@@ -46,21 +46,17 @@ indexOfByte_notFound:
 ;
 ; returns:
 ;	rax = rcx pointer - rdi pointer
-;
-; registers:
-;	rcx = local pointer to string
 ; -------------------------------------------------------------
 strLen:
-	mov rcx, rdi
+	mov rax, rdi
 
 strLen_loop:
-  cmp byte [rcx], 0
+  cmp byte [rax], 0
   jz strLen_return
-  inc rcx
+  inc rax
   jmp strLen_loop
 
 strLen_return:
-  mov rax, rcx
   sub rax, rdi
   ret
 

@@ -23,6 +23,7 @@ extern fadeActive
 
 global frameBuffer
 global rendererUpdateFrameBuffer
+global rendererDrawSpriteNoClip
 global rendererDrawSprite
 global rendererDrawMacroSprite
 global rendererClearFrameBuffer

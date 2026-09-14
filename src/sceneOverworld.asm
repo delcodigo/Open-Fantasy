@@ -26,6 +26,11 @@ extern npcsSize
 
 extern mapInitNPCs
 
+extern textDraw
+
+section .rodata
+  msgTest db "Hello world!", 0
+
 section .bss
   currentMap resq 1
   swapSceneEvent resq 1
@@ -133,6 +138,11 @@ sceneOverworldRender_npcs:
   jg sceneOverworldRender_npcs
 
 sceneOverworldRender_done:
+  mov edi, 0
+  mov esi, 0
+  lea rdx, [rel msgTest]
+  call textDraw
+
   pop r12
   ret
 
