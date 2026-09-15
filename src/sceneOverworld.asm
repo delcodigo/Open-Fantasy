@@ -29,7 +29,7 @@ extern mapInitNPCs
 extern textDraw
 
 section .rodata
-  msgTest db "Hello world!", 0
+  msgTest db "Hello", 10, "world!", 0
 
 section .bss
   currentMap resq 1

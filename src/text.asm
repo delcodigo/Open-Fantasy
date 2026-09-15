@@ -930,9 +930,13 @@ section .text
 ; edi: x, esi: y, rdx: text
 ; -------------------------------------------------------------
 textDraw:
+  sub rsp, 8
   push r12
   push r13
   push r14
+  push r15
+
+  mov r15d, edi
 
   mov r13, rdi
   mov r14, rdx
@@ -954,6 +958,10 @@ textDraw_loop:
   jge textDraw_return
 
   movzx rcx, byte [r14 + r13]
+  
+  cmp rcx, 10
+  jz textDraw_jumpLine
+
   sub rcx, 32
   shl rcx, 4
 
@@ -972,10 +980,18 @@ textDraw_loop:
   inc r13
   jmp textDraw_loop
 
+textDraw_jumpLine:
+  mov edi, r15d
+  add esi, 8
+  inc r13
+  jmp textDraw_loop
+
 textDraw_return:
+  pop r15
   pop r14
   pop r13
   pop r12
+  add rsp, 8
   ret
 
 section .note.GNU-stack noalloc noexec nowrite progbits
