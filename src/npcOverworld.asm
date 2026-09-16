@@ -27,7 +27,7 @@ global npcsSize
 
 section .bss
   npcsSize resb 1
-; npc(x: 32bit, y: 32bit, xt: 32bit, yt: 32bit, xp: 32bit, yp: 32bit, fi: 32bit, sprIn: 16bit, palIn: 8bit, dir: 8bit, sm: 8bit, upd: 64bit, time: 16bit) - 43 bytes per npc
+; npc(x: 32bit, y: 32bit, xt: 32bit, yt: 32bit, xp: 32bit, yp: 32bit, fi: 32bit, sprIn: 16bit, palIn: 8bit, dir: 8bit, sm: 8bit, upd: 64bit, time: 16bit, dialogue: 64bit) - 51 bytes per npc
   npcs resb NPC_STRUCT_SIZE * NPC_MAX
 
 section .text

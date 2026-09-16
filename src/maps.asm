@@ -28,6 +28,8 @@ extern playerXT
 extern playerY
 extern playerYT
 
+extern dialogue_town_test_npc1
+
 section .rodata
   town_test: 
     db 20, 23
@@ -72,11 +74,13 @@ section .rodata
     dw 0
     db 0
     dq npcOverworldUpdateIdleWalk
+    dq dialogue_town_test_npc1
 
     dd 96, 32
     dw 1
     db 1
     dq npcOverworldUpdateWanderer
+    dq 0
   
   house_test:
     db 16, 15
@@ -300,9 +304,12 @@ mapInitNPCs_loop:
   mov r8, qword [r14 + 11]
   mov qword [rdi + NPC_STRUCT_UPD], r8
 
+  mov r8, qword [r14 + 19]
+  mov qword [rdi + NPC_STRUCT_DIALOGUE], r8
+
   mov word [rdi + NPC_STRUCT_TIME], 120
 
-  add r14, 19
+  add r14, 27
 
   jmp mapInitNPCs_loop
 

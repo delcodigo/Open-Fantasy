@@ -29,6 +29,9 @@ extern characterOverworldUpdateMovement
 extern npcOverworldFaceAt
 extern npcOverworldGetNPCAt
 
+extern town_test_npc1
+extern dialogOpen
+
 global playerOverworldInit
 global playerOverworldUpdate
 global playerOverworldRender
@@ -70,6 +73,7 @@ playerOverworldUpdate:
   jz playerOverworldUpdate_walk
   cmp byte [rel playerSM], CHARACTER_SM_EVENT
   jz playerOverworldUpdate_executeEvent
+  jmp playerOverworldUpdate_return
 
 playerOverworldUpdate_idle:
   call playerOverworldUpdateMovementKeyPress
@@ -119,7 +123,7 @@ playerOverworldUpdate_return:
 
 ; -------------------------------------------------------------
 playerOverworldUpdateAction:
-  sub rsp, 8
+  push r12
   
   cmp byte [rel inputMap + KEY_E], 1
   jnz playerOverworldUpdateAction_return
@@ -153,15 +157,22 @@ playerOverworldUpdateAction_checkNPC:
   test rax, rax
   jz playerOverworldUpdateAction_return
 
+  mov r12, qword [rax + NPC_STRUCT_DIALOGUE]
+
   mov rdi, rax
   mov esi, [rel playerX]
   mov edx, [rel playerY]
   call npcOverworldFaceAt
 
+  mov rdi, r12
+  call dialogOpen
+
+  mov byte [rel playerSM], CHARACTER_SM_INTERACT
+
   mov rax, 1
 
 playerOverworldUpdateAction_return:
-  add rsp, 8
+  pop r12
   ret
 
 ; -------------------------------------------------------------

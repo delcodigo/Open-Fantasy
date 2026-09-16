@@ -26,12 +26,7 @@ extern npcsSize
 
 extern mapInitNPCs
 
-extern textDraw
-
-extern uiDrawDialogBox
-
-section .rodata
-  msgTest db "Hello", 10, "world!", 0
+extern dialogRender
 
 section .bss
   currentMap resq 1
@@ -140,12 +135,7 @@ sceneOverworldRender_npcs:
   jg sceneOverworldRender_npcs
 
 sceneOverworldRender_done:
-  call uiDrawDialogBox
-
-  mov edi, 24
-  mov esi, 24
-  lea rdx, [rel msgTest]
-  call textDraw
+  call dialogRender
 
   pop r12
   ret
