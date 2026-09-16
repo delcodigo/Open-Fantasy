@@ -949,9 +949,6 @@ textDraw:
   mov rdi, r13
   mov r12, rax
 
-  sar edi, 16
-  sar esi, 16
-
   xor r13, r13
 textDraw_loop:
   cmp r13, r12

@@ -28,6 +28,8 @@ extern mapInitNPCs
 
 extern textDraw
 
+extern uiDrawDialogBox
+
 section .rodata
   msgTest db "Hello", 10, "world!", 0
 
@@ -138,8 +140,10 @@ sceneOverworldRender_npcs:
   jg sceneOverworldRender_npcs
 
 sceneOverworldRender_done:
-  mov edi, 0
-  mov esi, 0
+  call uiDrawDialogBox
+
+  mov edi, 24
+  mov esi, 24
   lea rdx, [rel msgTest]
   call textDraw
 

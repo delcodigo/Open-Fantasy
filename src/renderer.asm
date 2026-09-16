@@ -22,8 +22,10 @@ extern fadeY
 extern fadeActive
 
 global frameBuffer
+global rendererClearLineWithColor
 global rendererUpdateFrameBuffer
 global rendererDrawSpriteNoClip
+global rendererDrawOpaqueNoClip
 global rendererDrawSprite
 global rendererDrawMacroSprite
 global rendererClearFrameBuffer
@@ -90,11 +92,30 @@ rendererFrameBufferResizeCallback_scale1OrMore:
 
   ret
 
+; -------------------------------------------------------------
 rendererClearFrameBuffer:
   lea rdi, [rel frameBuffer]
   xor eax, eax
   mov ecx, 245760 / 8
   rep stosq
+  ret
+
+; -------------------------------------------------------------
+; edi: x, esi: y, edx: width, ecx: color
+; -------------------------------------------------------------
+rendererClearLineWithColor:
+  mov r8d, esi
+  shl r8d, 8
+  add r8d, edi
+  shl r8d, 2
+
+  lea rdi, [rel frameBuffer]
+  add rdi, r8
+
+  mov eax, ecx
+  mov ecx, edx
+
+  rep stosd
   ret
 
 ; -------------------------------------------------------------
