@@ -39,6 +39,7 @@ global playerX
 global playerXT
 global playerY
 global playerYT
+global playerSM
 
 section .bss
   playerX resd 1
@@ -115,7 +116,7 @@ playerOverworldUpdate_executeEvent:
   mov byte [rel playerSM], CHARACTER_SM_NONE
   mov rdi, [rel playerEvent]
   call mapEventExecute
-  
+
 playerOverworldUpdate_return:
   call playerOverworldUpdateCamera
   add rsp, 8

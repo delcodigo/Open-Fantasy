@@ -26,6 +26,7 @@ extern npcsSize
 
 extern mapInitNPCs
 
+extern dialogUpdate
 extern dialogRender
 
 section .bss
@@ -94,6 +95,10 @@ sceneOverworldUpdate_noFade:
   call sceneOverworldSwapScene
 
 sceneOverworldUpdate_noSwap:
+  call dialogUpdate
+  test rax, rax
+  jnz sceneOverworldUpdate_noUpdate
+
   cmp byte [rel fadeActive], 0
   ja sceneOverworldUpdate_noUpdate
 
