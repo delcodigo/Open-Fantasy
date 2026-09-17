@@ -17,6 +17,8 @@ global dialogUpdate
 section .bss
   dialogIsActive resb 1
   dialogY resb 1
+  dialogOffset resb 1
+  dialogPage resb 1
   dialogReference resq 1
 
 section .text
@@ -26,6 +28,8 @@ section .text
 ; -------------------------------------------------------------
 dialogOpen:
   mov byte [rel dialogIsActive], 1
+  mov byte [rel dialogOffset], 1
+  mov byte [rel dialogPage], 0
   mov qword [rel dialogReference], rdi
 
   mov r8d, [rel playerY]
@@ -50,6 +54,27 @@ dialogUpdate:
   jnz dialogUpdate_return
   mov byte [rel inputMap + KEY_E], 2
 
+  mov r8, qword [rel dialogReference]
+  movzx r9d, byte [r8]
+  add byte [rel dialogPage], 1
+  cmp byte [rel dialogPage], r9b
+  jz dialogUpdate_noMorePages
+  movzx r10d, byte [rel dialogOffset]
+
+dialogUpdate_lookForOffset:
+  movzx r11d, byte [r8 + r10]
+  test r11d, r11d
+  jz dialogUpdate_newOffsetFound
+
+  inc r10d
+  jmp dialogUpdate_lookForOffset
+
+dialogUpdate_newOffsetFound:
+  inc r10d
+  mov byte [rel dialogOffset], r10b
+  jmp dialogUpdate_return
+
+dialogUpdate_noMorePages:
   mov byte [rel dialogIsActive], 0
   mov qword [rel dialogReference], 0
 
@@ -73,7 +98,11 @@ dialogRender:
   mov edi, 24
   movzx esi, byte [rel dialogY]
   add esi, 8
+
   mov rdx, [rel dialogReference]
+  movzx r8d, byte [rel dialogOffset]
+  add rdx, r8
+
   call textDraw
 
 dialogRender_return:
