@@ -89,29 +89,37 @@ section .rodata
 section .text
 
 ; -------------------------------------------------------------
+; edi: baseY
+; -------------------------------------------------------------
 uiDrawDialogBox:
+  sub rsp, 8
   push r12
+  push r13
+
+  mov r13d, edi
 
   mov edi, 16
-  mov esi, 16
+  mov esi, r13d
   lea rdx, [rel ui_boxtl]
   lea rcx, [rel ui_box_pal]
   call rendererDrawOpaqueNoClip
 
   mov edi, 232
-  mov esi, 16
+  mov esi, r13d
   lea rdx, [rel ui_boxtr]
   lea rcx, [rel ui_box_pal]
   call rendererDrawOpaqueNoClip
 
   mov edi, 16
-  mov esi, 88
+  mov esi, r13d
+  add esi, 72
   lea rdx, [rel ui_boxbl]
   lea rcx, [rel ui_box_pal]
   call rendererDrawOpaqueNoClip
 
   mov edi, 232
-  mov esi, 88
+  mov esi, r13d
+  add esi, 72
   lea rdx, [rel ui_boxbr]
   lea rcx, [rel ui_box_pal]
   call rendererDrawOpaqueNoClip
@@ -119,13 +127,14 @@ uiDrawDialogBox:
   mov r12d, 24
 uiDrawDialogBox_horizontalBorderLoop:
   mov edi, r12d
-  mov esi, 16
+  mov esi, r13d
   lea rdx, [rel ui_boxt]
   lea rcx, [rel ui_box_pal]
   call rendererDrawOpaqueNoClip
 
   mov edi, r12d
-  mov esi, 88
+  mov esi, r13d
+  add esi, 72
   lea rdx, [rel ui_boxb]
   lea rcx, [rel ui_box_pal]
   call rendererDrawOpaqueNoClip
@@ -134,7 +143,11 @@ uiDrawDialogBox_horizontalBorderLoop:
   cmp r12d, 232
   jl uiDrawDialogBox_horizontalBorderLoop
 
-  mov r12d, 24
+  mov r8d, r13d
+  add r8d, 72
+
+  mov r12d, 8
+  add r12d, r13d
 uiDrawDialogBox_verticalBorderLoop:
   mov edi, 16
   mov esi, r12d
@@ -148,11 +161,14 @@ uiDrawDialogBox_verticalBorderLoop:
   lea rcx, [rel ui_box_pal]
   call rendererDrawOpaqueNoClip
 
+  mov r8d, r13d
+  add r8d, 72
   add r12d, 8
-  cmp r12d, 88
+  cmp r12d, r8d
   jl uiDrawDialogBox_verticalBorderLoop
 
-  mov r12d, 24
+  mov r12d, 8
+  add r12d, r13d
 uiDrawDialogBox_centerBorderLoop:
   mov edi, 24
   mov esi, r12d
@@ -160,11 +176,15 @@ uiDrawDialogBox_centerBorderLoop:
   mov ecx, 0xFF000000
   call rendererClearLineWithColor
 
+  mov r8d, r13d
+  add r8d, 72
   inc r12d
-  cmp r12d, 88
+  cmp r12d, r8d
   jl uiDrawDialogBox_centerBorderLoop
 
+  pop r13
   pop r12
+  add rsp, 8
   ret
 
 section .note.GNU-stack noalloc noexec nowrite progbits
