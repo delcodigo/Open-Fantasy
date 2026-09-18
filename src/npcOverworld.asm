@@ -131,20 +131,24 @@ npcOverworldGetNPCAt_noResult:
   ret
 
 ; -------------------------------------------------------------
+npcOverworldNoUpdate:
+  mov dword [rdi + NPC_STRUCT_FI], 0
+  ret
+
+; -------------------------------------------------------------
 npcOverworldUpdateIdleWalk:
   cmp byte [rel dialogIsActive], 1
-  jz npcOverworldUpdateIdleWalk_noUpdate
+  jz npcOverworldNoUpdate
 
   mov byte [rdi + NPC_STRUCT_SM], CHARACTER_SM_IDLE_WALK
   mov byte [rdi + NPC_STRUCT_DIR], CHARACTER_DIR_DOWN
   ret
 
-npcOverworldUpdateIdleWalk_noUpdate:
-  mov dword [rdi + NPC_STRUCT_FI], 0
-  ret
-
 ; -------------------------------------------------------------
 npcOverworldUpdateWanderer:
+  cmp byte [rel dialogIsActive], 1
+  jz npcOverworldNoUpdate
+
   push r12
   push r13
   push r14
@@ -222,6 +226,11 @@ npcOverworldUpdateWanderer_randomTime:
   jmp npcOverworldUpdateWanderer_done
 
 npcOverworldUpdateWanderer_walk:
+  mov rdi, r12
+  mov esi, dword [r12 + NPC_STRUCT_XT]
+  mov edx, dword [r12 + NPC_STRUCT_YT]
+  call npcOverworldFaceAt
+
   lea rdi, [r12 + NPC_STRUCT_X]
   lea rsi, [r12 + NPC_STRUCT_Y]
   lea rdx, [r12 + NPC_STRUCT_XT]

@@ -29,6 +29,7 @@ extern playerY
 extern playerYT
 
 extern dialogue_town_test_npc1
+extern dialogue_town_test_npc2
 
 section .rodata
   town_test: 
@@ -80,7 +81,7 @@ section .rodata
     dw 1
     db 1
     dq npcOverworldUpdateWanderer
-    dq 0
+    dq dialogue_town_test_npc2
   
   house_test:
     db 16, 15
