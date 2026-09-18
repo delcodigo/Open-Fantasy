@@ -1,3 +1,5 @@
+extern dialogIsActive
+
 global spriteAnimationUpdate
 global spriteAnimationRoundFrame
 
@@ -18,6 +20,10 @@ spriteAnimationRoundFrame:
 ; -------------------------------------------------------------
 spriteAnimationUpdate:
   mov eax, [rdi]
+
+  cmp byte [rel dialogIsActive], 1
+  jz spriteAnimationUpdate_updateFrame
+
   add rax, rdx
 
 spriteAnimationUpdate_updateFrame:

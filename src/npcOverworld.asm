@@ -15,6 +15,8 @@ extern mapIsTileSolid
 
 extern rngNext
 
+extern dialogIsActive
+
 global npcOverworldFaceAt
 global npcOverworldGetNPCAt
 global npcOverworldInit
@@ -130,8 +132,15 @@ npcOverworldGetNPCAt_noResult:
 
 ; -------------------------------------------------------------
 npcOverworldUpdateIdleWalk:
+  cmp byte [rel dialogIsActive], 1
+  jz npcOverworldUpdateIdleWalk_noUpdate
+
   mov byte [rdi + NPC_STRUCT_SM], CHARACTER_SM_IDLE_WALK
   mov byte [rdi + NPC_STRUCT_DIR], CHARACTER_DIR_DOWN
+  ret
+
+npcOverworldUpdateIdleWalk_noUpdate:
+  mov dword [rdi + NPC_STRUCT_FI], 0
   ret
 
 ; -------------------------------------------------------------

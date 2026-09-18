@@ -13,6 +13,7 @@ extern inputMap
 global dialogOpen
 global dialogRender
 global dialogUpdate
+global dialogIsActive
 
 section .bss
   dialogIsActive resb 1
