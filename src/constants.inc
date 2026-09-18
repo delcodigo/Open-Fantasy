@@ -48,3 +48,7 @@
 
 %define NPC_TYPE_IDLE 0
 %define NPC_TYPE_WANDERER 1
+
+%define DIALOG_SPEED 2
+%define DIALOG_SM_TYPING 1
+%define DIALOG_SM_COMPLETED 2

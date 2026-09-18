@@ -112,14 +112,14 @@ uiDrawDialogBox:
 
   mov edi, 16
   mov esi, r13d
-  add esi, 72
+  add esi, 48
   lea rdx, [rel ui_boxbl]
   lea rcx, [rel ui_box_pal]
   call rendererDrawOpaqueNoClip
 
   mov edi, 232
   mov esi, r13d
-  add esi, 72
+  add esi, 48
   lea rdx, [rel ui_boxbr]
   lea rcx, [rel ui_box_pal]
   call rendererDrawOpaqueNoClip
@@ -134,7 +134,7 @@ uiDrawDialogBox_horizontalBorderLoop:
 
   mov edi, r12d
   mov esi, r13d
-  add esi, 72
+  add esi, 48
   lea rdx, [rel ui_boxb]
   lea rcx, [rel ui_box_pal]
   call rendererDrawOpaqueNoClip
@@ -144,7 +144,7 @@ uiDrawDialogBox_horizontalBorderLoop:
   jl uiDrawDialogBox_horizontalBorderLoop
 
   mov r8d, r13d
-  add r8d, 72
+  add r8d, 48
 
   mov r12d, 8
   add r12d, r13d
@@ -162,7 +162,7 @@ uiDrawDialogBox_verticalBorderLoop:
   call rendererDrawOpaqueNoClip
 
   mov r8d, r13d
-  add r8d, 72
+  add r8d, 48
   add r12d, 8
   cmp r12d, r8d
   jl uiDrawDialogBox_verticalBorderLoop
@@ -177,7 +177,7 @@ uiDrawDialogBox_centerBorderLoop:
   call rendererClearLineWithColor
 
   mov r8d, r13d
-  add r8d, 72
+  add r8d, 48
   inc r12d
   cmp r12d, r8d
   jl uiDrawDialogBox_centerBorderLoop

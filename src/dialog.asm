@@ -19,6 +19,9 @@ section .bss
   dialogY resb 1
   dialogOffset resb 1
   dialogPage resb 1
+  dialogText resb 145
+  dialogTextIndex resb 1
+  dialogSM resb 1
   dialogReference resq 1
 
 section .text
@@ -30,6 +33,8 @@ dialogOpen:
   mov byte [rel dialogIsActive], 1
   mov byte [rel dialogOffset], 1
   mov byte [rel dialogPage], 0
+  mov byte [rel dialogSM], DIALOG_SM_TYPING
+  mov byte [rel dialogTextIndex], 0
   mov qword [rel dialogReference], rdi
 
   mov r8d, [rel playerY]
@@ -38,43 +43,88 @@ dialogOpen:
   cmp r8d, 120
   jl dialogOpen_playerAbove
   mov byte [rel dialogY], 16
-  ret
+  jmp dialogClearText
 dialogOpen_playerAbove:
-  mov byte [rel dialogY], 144
+  mov byte [rel dialogY], 168
+  jmp dialogClearText
+
+; -------------------------------------------------------------
+dialogClearText:
+  mov byte [rel dialogTextIndex], 0
+
+  lea rdi, [rel dialogText]
+  xor eax, eax
+  mov ecx, 145
+  rep stosb
   ret
 
 ; -------------------------------------------------------------
-dialogUpdate:
+dialogUpdateTypewritterEffect:
+  cmp byte [rel dialogSM], DIALOG_SM_TYPING
+  jnz dialogUpdateTypewritterEffect_return
+
+  mov rdi, [rel dialogReference]
+  movzx r8d, byte [rel dialogOffset]
+  add rdi, r8
+  lea rsi, [rel dialogText]
+  movzx edx, byte [rel dialogTextIndex]
+  add rsi, rdx
+
+  xor r8, r8
+dialogUpdateTypewritterEffect_loop:
+  movzx ecx, byte [rdi + rdx]
+  mov byte [rsi], cl
+  inc rsi
+
+  inc dl
+  mov byte [rel dialogTextIndex], dl
+
+  test ecx, ecx
+  jz dialogUpdateTypewritterEffect_done
+
+  inc r8
+  cmp r8, DIALOG_SPEED
+  jl dialogUpdateTypewritterEffect_loop
+  ret
+
+dialogUpdateTypewritterEffect_done:
+  mov byte [rel dialogSM], DIALOG_SM_COMPLETED
+
+dialogUpdateTypewritterEffect_return:
+  ret
+
+; -------------------------------------------------------------
+dialogUpdateNextPage:
+  sub rsp, 8
   xor rax, rax
 
-  cmp byte [rel dialogIsActive], 1
-  jnz dialogUpdate_return
-
   cmp byte [rel inputMap + KEY_E], 1
-  jnz dialogUpdate_return
+  jnz dialogUpdateNextPage_return
   mov byte [rel inputMap + KEY_E], 2
 
   mov r8, qword [rel dialogReference]
   movzx r9d, byte [r8]
   add byte [rel dialogPage], 1
   cmp byte [rel dialogPage], r9b
-  jz dialogUpdate_noMorePages
+  jz dialogUpdateNextPage_noMorePages
   movzx r10d, byte [rel dialogOffset]
 
-dialogUpdate_lookForOffset:
+dialogUpdateNextPage_lookForOffset:
   movzx r11d, byte [r8 + r10]
   test r11d, r11d
-  jz dialogUpdate_newOffsetFound
+  jz dialogUpdateNextPage_newOffsetFound
 
   inc r10d
-  jmp dialogUpdate_lookForOffset
+  jmp dialogUpdateNextPage_lookForOffset
 
-dialogUpdate_newOffsetFound:
+dialogUpdateNextPage_newOffsetFound:
   inc r10d
   mov byte [rel dialogOffset], r10b
-  jmp dialogUpdate_return
+  mov byte [rel dialogSM], DIALOG_SM_TYPING
+  call dialogClearText
+  jmp dialogUpdateNextPage_return
 
-dialogUpdate_noMorePages:
+dialogUpdateNextPage_noMorePages:
   mov byte [rel dialogIsActive], 0
   mov qword [rel dialogReference], 0
 
@@ -82,7 +132,24 @@ dialogUpdate_noMorePages:
 
   mov rax, 1
 
+dialogUpdateNextPage_return:
+  add rsp, 8
+  ret
+
+; -------------------------------------------------------------
+dialogUpdate:
+  sub rsp, 8
+
+  xor rax, rax
+
+  cmp byte [rel dialogIsActive], 1
+  jnz dialogUpdate_return
+
+  call dialogUpdateTypewritterEffect
+  call dialogUpdateNextPage
+
 dialogUpdate_return:
+  add rsp, 8
   ret
 
 ; -------------------------------------------------------------
@@ -99,10 +166,7 @@ dialogRender:
   movzx esi, byte [rel dialogY]
   add esi, 8
 
-  mov rdx, [rel dialogReference]
-  movzx r8d, byte [rel dialogOffset]
-  add rdx, r8
-
+  lea rdx, [rel dialogText]
   call textDraw
 
 dialogRender_return:
