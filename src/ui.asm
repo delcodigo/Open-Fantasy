@@ -2,6 +2,7 @@ extern rendererDrawOpaqueNoClip
 extern rendererClearLineWithColor
 
 global uiDrawDialogBox
+global uiDrawNextArrow
 
 section .rodata
   ui_box_pal dd 0xFF000000, 0xFFEBEBEB, 0xFFA2A2A2, 0xFF797979
@@ -85,6 +86,16 @@ section .rodata
     db 0b00000000, 0b00101100
     db 0b11111111, 0b11110000
     db 0b00000000, 0b00000000
+
+  ui_nextPage:
+    db 0b00000000, 0b00000000
+    db 0b00000000, 0b00000000
+    db 0b00000000, 0b00000000
+    db 0b00000000, 0b00000000
+    db 0b11010101, 0b01010111
+    db 0b00110101, 0b01011100
+    db 0b00001101, 0b01110000
+    db 0b00000011, 0b11000000
 
 section .text
 
@@ -184,6 +195,19 @@ uiDrawDialogBox_centerBorderLoop:
 
   pop r13
   pop r12
+  add rsp, 8
+  ret
+
+; -------------------------------------------------------------
+; edi: x, esi: y
+; -------------------------------------------------------------
+uiDrawNextArrow:
+  sub rsp, 8
+
+  lea rdx, [rel ui_nextPage]
+  lea rcx, [rel ui_box_pal]
+  call rendererDrawOpaqueNoClip
+
   add rsp, 8
   ret
 

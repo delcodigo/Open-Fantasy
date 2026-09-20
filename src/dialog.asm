@@ -1,6 +1,7 @@
 %include "src/constants.inc"
 
 extern uiDrawDialogBox
+extern uiDrawNextArrow
 extern textDraw
 
 extern playerSM
@@ -20,9 +21,10 @@ section .bss
   dialogY resb 1
   dialogOffset resb 1
   dialogPage resb 1
-  dialogText resb 145
   dialogTextIndex resb 1
   dialogSM resb 1
+  dialogNPFI resb 1
+  dialogText resb 145
   dialogReference resq 1
 
 section .text
@@ -36,6 +38,7 @@ dialogOpen:
   mov byte [rel dialogPage], 0
   mov byte [rel dialogSM], DIALOG_SM_TYPING
   mov byte [rel dialogTextIndex], 0
+  mov byte [rel dialogNPFI], 30
   mov qword [rel dialogReference], rdi
 
   mov r8d, [rel playerY]
@@ -95,6 +98,33 @@ dialogUpdateTypewritterEffect_return:
   ret
 
 ; -------------------------------------------------------------
+dialogUpdateFillPage:
+  mov rdi, [rel dialogReference]
+  lea rsi, [rel dialogText]
+
+  movzx ecx, byte [rel dialogOffset]
+  movzx edx, byte [rel dialogTextIndex]
+
+  add rdi, rcx
+  add rdi, rdx
+  add rsi, rdx
+
+dialogUpdateFillPage_loop:
+  movzx r8d, byte [rdi]
+  mov byte [rsi], r8b
+
+  inc rdi
+  inc rsi
+
+  cmp r8b, 0
+  jz dialogUpdateFillPage_return
+  jmp dialogUpdateFillPage_loop
+
+dialogUpdateFillPage_return:
+  mov byte [rel dialogSM], DIALOG_SM_COMPLETED
+  jmp dialogUpdateNextPage_return
+
+; -------------------------------------------------------------
 dialogUpdateNextPage:
   sub rsp, 8
   xor rax, rax
@@ -102,6 +132,9 @@ dialogUpdateNextPage:
   cmp byte [rel inputMap + KEY_E], 1
   jnz dialogUpdateNextPage_return
   mov byte [rel inputMap + KEY_E], 2
+
+  cmp byte [rel dialogSM], DIALOG_SM_TYPING
+  jz dialogUpdateFillPage
 
   mov r8, qword [rel dialogReference]
   movzx r9d, byte [r8]
@@ -122,6 +155,7 @@ dialogUpdateNextPage_newOffsetFound:
   inc r10d
   mov byte [rel dialogOffset], r10b
   mov byte [rel dialogSM], DIALOG_SM_TYPING
+  mov byte [rel dialogNPFI], 30
   call dialogClearText
   jmp dialogUpdateNextPage_return
 
@@ -149,6 +183,14 @@ dialogUpdate:
   call dialogUpdateTypewritterEffect
   call dialogUpdateNextPage
 
+  cmp byte [rel dialogSM], DIALOG_SM_TYPING
+  jz dialogUpdate_return
+  
+  dec byte [rel dialogNPFI]
+  cmp byte [rel dialogNPFI], 0
+  jge dialogUpdate_return
+  mov byte [rel dialogNPFI], 60
+
 dialogUpdate_return:
   add rsp, 8
   ret
@@ -169,6 +211,16 @@ dialogRender:
 
   lea rdx, [rel dialogText]
   call textDraw
+
+  cmp byte [rel dialogSM], DIALOG_SM_COMPLETED
+  jnz dialogRender_return
+  cmp byte [rel dialogNPFI], 30
+  jg dialogRender_return
+
+  mov edi, 216
+  movzx esi, byte [rel dialogY]
+  add esi, 48
+  call uiDrawNextArrow
 
 dialogRender_return:
   add rsp, 8
