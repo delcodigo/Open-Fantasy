@@ -25,6 +25,7 @@ section .bss
   dialogSM resb 1
   dialogNPFI resb 1
   dialogText resb 145
+  dialogBoxHeight resb 1
   dialogReference resq 1
 
 section .text
@@ -36,9 +37,10 @@ dialogOpen:
   mov byte [rel dialogIsActive], 1
   mov byte [rel dialogOffset], 1
   mov byte [rel dialogPage], 0
-  mov byte [rel dialogSM], DIALOG_SM_TYPING
+  mov byte [rel dialogSM], DIALOG_SM_OPENING
   mov byte [rel dialogTextIndex], 0
   mov byte [rel dialogNPFI], 30
+  mov byte [rel dialogBoxHeight], 8
   mov qword [rel dialogReference], rdi
 
   mov r8d, [rel playerY]
@@ -172,6 +174,19 @@ dialogUpdateNextPage_return:
   ret
 
 ; -------------------------------------------------------------
+dialogUpdateOpeningBox:
+  add byte [rel dialogBoxHeight], DIALOG_OPENING_SPEED
+  cmp byte [rel dialogBoxHeight], DIALOG_BOX_HEIGHT
+  jl dialogUpdateOpeningBox_return
+
+  mov byte [rel dialogSM], DIALOG_SM_TYPING
+  mov byte [rel dialogBoxHeight], DIALOG_BOX_HEIGHT
+
+dialogUpdateOpeningBox_return:
+  add rsp, 8
+  ret
+
+; -------------------------------------------------------------
 dialogUpdate:
   sub rsp, 8
 
@@ -179,6 +194,9 @@ dialogUpdate:
 
   cmp byte [rel dialogIsActive], 1
   jnz dialogUpdate_return
+
+  cmp byte [rel dialogSM], DIALOG_SM_OPENING
+  jz dialogUpdateOpeningBox
 
   call dialogUpdateTypewritterEffect
   call dialogUpdateNextPage
@@ -203,7 +221,11 @@ dialogRender:
   jnz dialogRender_return
 
   movzx edi, byte [rel dialogY]
+  movzx esi, byte [rel dialogBoxHeight]
   call uiDrawDialogBox
+
+  cmp byte [rel dialogSM], DIALOG_SM_OPENING
+  jz dialogRender_return
 
   mov edi, 24
   movzx esi, byte [rel dialogY]

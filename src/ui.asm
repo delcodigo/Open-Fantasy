@@ -100,14 +100,16 @@ section .rodata
 section .text
 
 ; -------------------------------------------------------------
-; edi: baseY
+; edi: baseY, esi: height
 ; -------------------------------------------------------------
 uiDrawDialogBox:
-  sub rsp, 8
   push r12
   push r13
+  push r14
 
   mov r13d, edi
+  mov r14d, esi
+  sub r14, 8
 
   mov edi, 16
   mov esi, r13d
@@ -121,20 +123,6 @@ uiDrawDialogBox:
   lea rcx, [rel ui_box_pal]
   call rendererDrawOpaqueNoClip
 
-  mov edi, 16
-  mov esi, r13d
-  add esi, 48
-  lea rdx, [rel ui_boxbl]
-  lea rcx, [rel ui_box_pal]
-  call rendererDrawOpaqueNoClip
-
-  mov edi, 232
-  mov esi, r13d
-  add esi, 48
-  lea rdx, [rel ui_boxbr]
-  lea rcx, [rel ui_box_pal]
-  call rendererDrawOpaqueNoClip
-
   mov r12d, 24
 uiDrawDialogBox_horizontalBorderLoop:
   mov edi, r12d
@@ -145,7 +133,7 @@ uiDrawDialogBox_horizontalBorderLoop:
 
   mov edi, r12d
   mov esi, r13d
-  add esi, 48
+  add esi, r14d
   lea rdx, [rel ui_boxb]
   lea rcx, [rel ui_box_pal]
   call rendererDrawOpaqueNoClip
@@ -155,7 +143,7 @@ uiDrawDialogBox_horizontalBorderLoop:
   jl uiDrawDialogBox_horizontalBorderLoop
 
   mov r8d, r13d
-  add r8d, 48
+  add r8d, r14d
 
   mov r12d, 8
   add r12d, r13d
@@ -173,7 +161,7 @@ uiDrawDialogBox_verticalBorderLoop:
   call rendererDrawOpaqueNoClip
 
   mov r8d, r13d
-  add r8d, 48
+  add r8d, r14d
   add r12d, 8
   cmp r12d, r8d
   jl uiDrawDialogBox_verticalBorderLoop
@@ -188,14 +176,28 @@ uiDrawDialogBox_centerBorderLoop:
   call rendererClearLineWithColor
 
   mov r8d, r13d
-  add r8d, 48
+  add r8d, r14d
   inc r12d
   cmp r12d, r8d
   jl uiDrawDialogBox_centerBorderLoop
 
+  mov edi, 16
+  mov esi, r13d
+  add esi, r14d
+  lea rdx, [rel ui_boxbl]
+  lea rcx, [rel ui_box_pal]
+  call rendererDrawOpaqueNoClip
+
+  mov edi, 232
+  mov esi, r13d
+  add esi, r14d
+  lea rdx, [rel ui_boxbr]
+  lea rcx, [rel ui_box_pal]
+  call rendererDrawOpaqueNoClip
+
+  pop r14
   pop r13
   pop r12
-  add rsp, 8
   ret
 
 ; -------------------------------------------------------------
